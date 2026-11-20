@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="{{@site.locale}}">
+<head>
+    <title>{{meta_title page=" (page %)"}}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preload" as="style" href="{{asset "built/screen.css"}}">
+    {{> "typography/fonts"}}
+    <link rel="stylesheet" type="text/css" href="{{asset "built/screen.css"}}">
+
+    {{ghost_head}}
+</head>
+<body class="{{body_class}}">
+
+<a class="kb-skip" href="#kb-main">Aller au contenu</a>
+
+<div class="kb-viewport">
+
+    {{> "components/navigation"}}
+
+    <main id="kb-main" class="kb-main" tabindex="-1">
+        {{{body}}}
+    </main>
+
+    {{> "components/footer"}}
+
+</div>
+
+<script src="{{asset "built/source.js"}}" defer></script>
+
+{{ghost_foot}}
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+    "name": "kibo",
+    "description": "Thème Ghost de Reaching Kibo, dérivé de Source 1.7.6",
+    "demo": "https://www.reachingkibo.com",
+    "version": "1.0.0",
+    "engines": {
+        "ghost": ">=5.0.0",
+        "node": ">=22.12.0"
+    },
+    "license": "MIT",
+    "scripts": {
+        "build": "gulp build",
+        "zip": "gulp zip",
+        "test": "gscan ."
+    },
+    "packageManager": "pnpm@12.4.2",
+    "author": {
+        "name": "Romain Nicault",
+        "email": "RomainNicault@users.noreply.github.com",
+        "url": "https://www.reachingkibo.com/"
+    },
+    "keywords": [
+        "ghost",
+        "theme",
+        "ghost-theme"
+    ],
+    "devDependencies": {
+        "@tryghost/release-utils": "0.9.2",
+        "@tryghost/theme-translations": "0.0.22",
+        "autoprefixer": "10.6.1",
+        "beeper": "2.1.0",
+        "cssnano": "9.0.5",
+        "gscan": "6.6.1",
+        "gulp": "5.0.1",
+        "gulp-concat": "2.6.1",
+        "gulp-livereload": "4.0.2",
+        "gulp-postcss": "10.0.0",
+        "gulp-uglify": "3.0.2",
+        "gulp-zip": "6.1.0",
+        "inquirer": "14.2.2",
+        "postcss": "8.5.28",
+        "postcss-easy-import": "4.0.0",
+        "pump": "3.0.4"
+    },
+    "browserslist": [
+        "defaults"
+    ],
+    "config": {
+        "posts_per_page": 12,
+        "image_sizes": {
+            "xs": {
+                "width": 160
+            },
+            "s": {
+                "width": 320
+            },
+            "m": {
+                "width": 600
+            },
+            "l": {
+                "width": 960
+            },
+            "xl": {
+                "width": 1200
+            },
+            "xxl": {
+                "width": 2000
+            }
+        },
+        "card_assets": true
+    }
+}

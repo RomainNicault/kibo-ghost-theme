@@ -1,0 +1,133 @@
+{{!-- Table des matières du hub Basecamp, façon livre : chapitres numérotés et leurs pages.
+     Généré pour l'ordre éditorial du playbook (Le chemin, puis catalogue et sources). --}}
+<section class="kb-book" aria-labelledby="kb-book-title">
+    <h2 class="kb-book-title" id="kb-book-title">Table des matières</h2>
+    <ol class="kb-book-list">
+        <li class="kb-book-chapter">
+            <p class="kb-book-num" aria-hidden="true">01</p>
+            <div class="kb-book-body">
+                {{#get "pages" filter="slug:acquisition" limit="1" as |chap|}}
+                    {{#foreach chap}}
+                        <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/acquisition/"><span class="kb-label">Chapitre 1 · Acquisition</span> <span class="kb-book-chapter-name">{{title}}</span></a></h3>
+                        {{#if custom_excerpt}}<p class="kb-book-dek">{{custom_excerpt}}</p>{{/if}}
+                    {{/foreach}}
+                {{else}}
+                    <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/acquisition/"><span class="kb-label">Chapitre 1</span> <span class="kb-book-chapter-name">Acquisition</span></a></h3>
+                {{/get}}
+                {{#get "pages" filter="tag:acquisition+slug:-acquisition" order="title asc" limit="100" fields="title,slug" as |items meta|}}
+                    {{#if items}}
+                        <p class="kb-book-count">{{meta.total}} pages</p>
+                        <ul class="kb-book-pages">
+                            {{#foreach items}}<li><a href="{{@site.url}}/basecamp/acquisition/{{slug}}/">{{title}}</a></li>{{/foreach}}
+                        </ul>
+                    {{/if}}
+                {{/get}}
+            </div>
+        </li>
+        <li class="kb-book-chapter">
+            <p class="kb-book-num" aria-hidden="true">02</p>
+            <div class="kb-book-body">
+                {{#get "pages" filter="slug:pilotage" limit="1" as |chap|}}
+                    {{#foreach chap}}
+                        <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/pilotage/"><span class="kb-label">Chapitre 2 · Pilotage</span> <span class="kb-book-chapter-name">{{title}}</span></a></h3>
+                        {{#if custom_excerpt}}<p class="kb-book-dek">{{custom_excerpt}}</p>{{/if}}
+                    {{/foreach}}
+                {{else}}
+                    <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/pilotage/"><span class="kb-label">Chapitre 2</span> <span class="kb-book-chapter-name">Pilotage</span></a></h3>
+                {{/get}}
+                {{#get "pages" filter="tag:pilotage+slug:-pilotage" order="title asc" limit="100" fields="title,slug" as |items meta|}}
+                    {{#if items}}
+                        <p class="kb-book-count">{{meta.total}} pages</p>
+                        <ul class="kb-book-pages">
+                            {{#foreach items}}<li><a href="{{@site.url}}/basecamp/pilotage/{{slug}}/">{{title}}</a></li>{{/foreach}}
+                        </ul>
+                    {{/if}}
+                {{/get}}
+            </div>
+        </li>
+        <li class="kb-book-chapter">
+            <p class="kb-book-num" aria-hidden="true">03</p>
+            <div class="kb-book-body">
+                {{#get "pages" filter="slug:notoriete" limit="1" as |chap|}}
+                    {{#foreach chap}}
+                        <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/notoriete/"><span class="kb-label">Chapitre 3 · Brand building</span> <span class="kb-book-chapter-name">{{title}}</span></a></h3>
+                        {{#if custom_excerpt}}<p class="kb-book-dek">{{custom_excerpt}}</p>{{/if}}
+                    {{/foreach}}
+                {{else}}
+                    <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/notoriete/"><span class="kb-label">Chapitre 3</span> <span class="kb-book-chapter-name">Brand building</span></a></h3>
+                {{/get}}
+                {{#get "pages" filter="tag:notoriete+slug:-notoriete" order="title asc" limit="100" fields="title,slug" as |items meta|}}
+                    {{#if items}}
+                        <p class="kb-book-count">{{meta.total}} pages</p>
+                        <ul class="kb-book-pages">
+                            {{#foreach items}}<li><a href="{{@site.url}}/basecamp/notoriete/{{slug}}/">{{title}}</a></li>{{/foreach}}
+                        </ul>
+                    {{/if}}
+                {{/get}}
+            </div>
+        </li>
+        <li class="kb-book-chapter">
+            <p class="kb-book-num" aria-hidden="true">04</p>
+            <div class="kb-book-body">
+                {{#get "pages" filter="slug:strategie" limit="1" as |chap|}}
+                    {{#foreach chap}}
+                        <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/strategie/"><span class="kb-label">Chapitre 4 · Stratégie</span> <span class="kb-book-chapter-name">{{title}}</span></a></h3>
+                        {{#if custom_excerpt}}<p class="kb-book-dek">{{custom_excerpt}}</p>{{/if}}
+                    {{/foreach}}
+                {{else}}
+                    <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/strategie/"><span class="kb-label">Chapitre 4</span> <span class="kb-book-chapter-name">Stratégie</span></a></h3>
+                {{/get}}
+                {{#get "pages" filter="tag:strategie+slug:-strategie" order="title asc" limit="100" fields="title,slug" as |items meta|}}
+                    {{#if items}}
+                        <p class="kb-book-count">{{meta.total}} pages</p>
+                        <ul class="kb-book-pages">
+                            {{#foreach items}}<li><a href="{{@site.url}}/basecamp/strategie/{{slug}}/">{{title}}</a></li>{{/foreach}}
+                        </ul>
+                    {{/if}}
+                {{/get}}
+            </div>
+        </li>
+        <li class="kb-book-chapter is-annex">
+            <p class="kb-book-num" aria-hidden="true"></p>
+            <div class="kb-book-body">
+                {{#get "pages" filter="slug:canaux" limit="1" as |chap|}}
+                    {{#foreach chap}}
+                        <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/canaux/"><span class="kb-label">Catalogue · Canaux</span> <span class="kb-book-chapter-name">{{title}}</span></a></h3>
+                        {{#if custom_excerpt}}<p class="kb-book-dek">{{custom_excerpt}}</p>{{/if}}
+                    {{/foreach}}
+                {{else}}
+                    <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/canaux/"><span class="kb-label">Catalogue</span> <span class="kb-book-chapter-name">Canaux</span></a></h3>
+                {{/get}}
+                {{#get "pages" filter="tag:canaux+slug:-canaux" order="title asc" limit="100" fields="title,slug" as |items meta|}}
+                    {{#if items}}
+                        <p class="kb-book-count">{{meta.total}} pages</p>
+                        <ul class="kb-book-pages">
+                            {{#foreach items}}<li><a href="{{@site.url}}/basecamp/canaux/{{slug}}/">{{title}}</a></li>{{/foreach}}
+                        </ul>
+                    {{/if}}
+                {{/get}}
+            </div>
+        </li>
+        <li class="kb-book-chapter is-annex">
+            <p class="kb-book-num" aria-hidden="true"></p>
+            <div class="kb-book-body">
+                {{#get "pages" filter="slug:sources" limit="1" as |chap|}}
+                    {{#foreach chap}}
+                        <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/sources/"><span class="kb-label">Index · Sources</span> <span class="kb-book-chapter-name">{{title}}</span></a></h3>
+                        {{#if custom_excerpt}}<p class="kb-book-dek">{{custom_excerpt}}</p>{{/if}}
+                    {{/foreach}}
+                {{else}}
+                    <h3 class="kb-book-chapter-title"><a href="{{@site.url}}/basecamp/sources/"><span class="kb-label">Index</span> <span class="kb-book-chapter-name">Sources</span></a></h3>
+                {{/get}}
+                {{#get "pages" filter="tag:sources+slug:-sources" order="title asc" limit="100" fields="title,slug" as |items meta|}}
+                    {{#if items}}
+                        <p class="kb-book-count">{{meta.total}} pages</p>
+                        <ul class="kb-book-pages">
+                            {{#foreach items}}<li><a href="{{@site.url}}/basecamp/sources/{{slug}}/">{{title}}</a></li>{{/foreach}}
+                        </ul>
+                    {{/if}}
+                {{/get}}
+            </div>
+        </li>
+    </ol>
+</section>

@@ -1,0 +1,13 @@
+{{!-- Liste typographique des publications (archives, tags, auteurs) : date, titre, chapeau, sans image. --}}
+<ol class="kb-list">
+    {{#foreach posts}}
+        <li class="kb-list-item">
+            <a class="kb-essay-link" href="{{url}}">
+                <time class="kb-label kb-essay-date" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMMM YYYY"}}</time>
+                <h2 class="kb-list-title">{{title}}</h2>
+                {{#if custom_excerpt}}<p class="kb-essay-dek">{{custom_excerpt}}</p>{{/if}}
+            </a>
+        </li>
+    {{/foreach}}
+</ol>
+{{pagination}}

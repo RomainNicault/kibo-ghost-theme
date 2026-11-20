@@ -1,0 +1,59 @@
+{{!< default}}
+{{!-- Post (essai ou dépêche) : auteur, date et durée de lecture en tête ; lecture en colonne ; un seul bloc d'abonnement. --}}
+
+{{#post}}
+<article class="kb-article kb-post {{post_class}}">
+    <div class="kb-reading">
+        <header class="kb-article-head">
+            <p class="kb-label kb-kicker"><time datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMMM YYYY"}}</time></p>
+            <h1 class="kb-title">{{title}}</h1>
+            {{#if custom_excerpt}}<p class="kb-dek">{{custom_excerpt}}</p>{{/if}}
+            <p class="kb-meta">
+                <span>Par {{authors}}</span>
+                <span>{{reading_time minute="1 min de lecture" minutes="% min de lecture"}}</span>
+            </p>
+        </header>
+        {{> "kb-reading"}}
+        <footer class="kb-article-end">
+            {{> "kb-subscribe" id="kb-email-post"}}
+            {{#if comments}}
+                <div class="kb-comments">{{comments}}</div>
+            {{/if}}
+        </footer>
+    </div>
+</article>
+{{/post}}
+
+<section class="kb-after" aria-labelledby="kb-after-title">
+    <div class="kb-after-inner">
+        {{> "kb-swell"}}
+        <h2 class="kb-after-title" id="kb-after-title">À lire ensuite</h2>
+        <div class="kb-after-grid">
+            <div>
+                <p class="kb-label">Essais</p>
+                {{#get "posts" filter="id:-{{post.id}}+slug:-~'depeche-basecamp'" limit="3" as |more|}}
+                    <ul class="kb-compact">
+                        {{#foreach more}}
+                            <li><a class="kb-compact-link" href="{{url}}"><time class="kb-label" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMM YYYY"}}</time><span class="kb-compact-title">{{title}}</span></a></li>
+                        {{/foreach}}
+                    </ul>
+                {{/get}}
+            </div>
+            <div>
+                <p class="kb-label">Dépêches de Basecamp</p>
+                {{#get "posts" filter="id:-{{post.id}}+slug:~'depeche-basecamp'" limit="3" as |more|}}
+                    <ul class="kb-compact">
+                        {{#foreach more}}
+                            <li><a class="kb-compact-link" href="{{url}}"><time class="kb-label" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMM YYYY"}}</time><span class="kb-compact-title">{{title}}</span></a></li>
+                        {{/foreach}}
+                    </ul>
+                {{/get}}
+            </div>
+            <div>
+                <p class="kb-label">Basecamp</p>
+                <p class="kb-after-note">Les concepts cités, expliqués un par un avec leurs sources.</p>
+                <p class="kb-more"><a href="{{@site.url}}/basecamp/">Table des matières de Basecamp</a></p>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,1790 @@
+/* Thème kibo, direction A « Carnet de terrain »
+   Charte : DESIGN.md. Couleurs : bleu nuit, blanc, mélanges bleu nuit-blanc, orange (accent rare,
+   surfaces de marque seulement), Lave (survol du bouton). Aucune ombre, aucun dégradé, aucun flou.
+
+   1. Jetons          8. Article : en-tête, planche
+   2. Base            9. Sommaire et carnet de notes
+   3. Navigation     10. Contenu de l'éditeur et cartes kg-*
+   4. Bandeau        11. Fin de lecture : abonnement, chapitre, suite
+   5. Accueil        12. Hub : table des matières
+   6. Listes         13. Archives, pagination
+   7. Abonnement     14. Pied de page
+*/
+
+/* 1. Jetons
+/* ---------------------------------------------------------- */
+
+:root {
+    --navy: #0A1A3A;
+    --white: #FFFFFF;
+    --orange: #FF8C00;
+    --lava: #2A1E14;
+    --ink-muted: #4F5A71;   /* 72 % bleu nuit */
+    --rule: #DADDE1;        /* 15 % */
+    --wash: #F5F6F7;        /* 4 % */
+    --on-navy-muted: #B6BAC4; /* 30 % : texte secondaire sur bleu nuit */
+    --on-navy-rule: #3B4861;  /* 80 % : filet sur bleu nuit */
+
+    --font-title: "Bespoke Stencil", "Supreme", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Supreme", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+    --gutter: clamp(20px, 5vw, 40px);
+    --measure: 680px;
+    --wide: 1200px;
+    --radius: 2px;
+
+    /* Tireté-point des voies d'ascension (horizontal, vertical) et filet anglais du fleuron */
+    --dashdot-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='6' viewBox='0 0 14 6'%3E%3Crect x='0' y='2.4' width='7' height='1.2' fill='%230A1A3A'/%3E%3Ccircle cx='10.5' cy='3' r='1.2' fill='%230A1A3A'/%3E%3C/svg%3E");
+    --dashdot-v: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='14' viewBox='0 0 6 14'%3E%3Crect x='2.4' y='0' width='1.2' height='7' fill='%230A1A3A'/%3E%3Ccircle cx='3' cy='10.5' r='1.2' fill='%230A1A3A'/%3E%3C/svg%3E");
+    --swell: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='8' viewBox='0 0 240 8'%3E%3Cpath d='M0 4 Q120 0.6 240 4 Q120 7.4 0 4Z' fill='%230A1A3A'/%3E%3C/svg%3E");
+}
+
+/* 2. Base
+/* ---------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+[hidden] { display: none !important; }
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--navy);
+    background-color: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+}
+
+img, picture, video, canvas, svg { display: block; max-width: 100%; height: auto; }
+iframe { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; color: inherit; }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; }
+hr { border: 0; color: var(--rule); }
+p, h1, h2, h3, h4, h5, h6, li, dd { overflow-wrap: break-word; }
+h1, h2, h3, h4 { text-wrap: balance; }
+/* text-wrap: pretty réservé aux textes courts : sur les longues pages il coûte cher en mise en page (TBT) */
+.kb-dek, .kb-essay-dek, .kb-band-promise, figcaption { text-wrap: pretty; }
+ul, ol { padding: 0; }
+
+::selection { background-color: var(--navy); color: var(--white); }
+
+:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 2px;
+}
+
+.kb-band :focus-visible,
+.kb-footer :focus-visible { outline-color: var(--white); }
+
+.kb-skip {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 16px;
+    background-color: var(--navy);
+    color: var(--white);
+    font-weight: 500;
+    text-decoration: none;
+    transform: translateY(-200%);
+}
+.kb-skip:focus { transform: none; }
+
+.kb-main:focus { outline: none; }
+
+.kb-label {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.kb-dot {
+    display: inline-block;
+    width: 0.16em;
+    height: 0.16em;
+    margin-left: 0.08em;
+    background-color: var(--orange);
+    vertical-align: baseline;
+}
+
+.kb-more { margin-top: 16px; }
+.kb-more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+.kb-more a::after { content: "→"; text-decoration: none; }
+.kb-more a:hover { text-decoration-thickness: 2px; }
+
+.kb-empty { color: var(--ink-muted); }
+
+/* Filet de section : trait droit, cohérent avec les filets du reste de l'interface */
+.kb-swell {
+    height: 1px;
+    margin: 40px auto;
+    max-width: 240px;
+    background-color: var(--navy);
+}
+
+/* 3. Navigation
+/* ---------------------------------------------------------- */
+
+.kb-nav {
+    border-bottom: 1px solid var(--rule);
+    background-color: var(--white);
+}
+
+.kb-nav-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+        "brand search sub"
+        "primary primary signin";
+    align-items: center;
+    column-gap: 8px;
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 8px var(--gutter) 4px;
+}
+
+.kb-nav-brand {
+    grid-area: brand;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-title);
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.kb-nav-primary { grid-area: primary; }
+.kb-nav-actions { display: contents; }
+.kb-icon-button { grid-area: search; }
+.kb-nav-signin { grid-area: signin; justify-self: end; }
+.kb-nav-secondary { grid-area: sub; }
+
+.kb-nav .nav {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 20px;
+    list-style: none;
+}
+
+.kb-nav-primary .nav a,
+.kb-nav-signin {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.kb-nav-primary .nav a:hover,
+.kb-nav-signin:hover { text-decoration: underline; text-underline-offset: 0.25em; }
+
+.kb-nav-primary .nav-current a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.35em;
+}
+
+.kb-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+}
+
+.kb-icon-button svg { width: 20px; height: 20px; }
+
+.kb-nav-secondary .nav a,
+.kb-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius);
+    background-color: var(--navy);
+    color: var(--white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.kb-nav-secondary .nav a:hover,
+.kb-button:hover { background-color: var(--lava); }
+
+@media (min-width: 768px) {
+    .kb-nav-inner {
+        grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+        grid-template-areas: "brand primary search signin sub";
+        column-gap: 16px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+    .kb-nav-brand { font-size: 1.5rem; margin-right: 24px; }
+    .kb-nav-signin { margin: 0 4px; }
+}
+
+/* 4. Bandeau de marque (accueil)
+/* ---------------------------------------------------------- */
+
+.kb-band {
+    background-color: var(--navy);
+    color: var(--white);
+}
+
+.kb-band-inner {
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 32px var(--gutter) 0;
+}
+
+.kb-band-inner:not(.has-cover) { padding-bottom: 32px; }
+
+.kb-band-title {
+    max-width: 22ch;
+    font-family: var(--font-title);
+    font-size: clamp(2rem, 7vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+}
+
+.kb-band-promise {
+    max-width: 34ch;
+    text-wrap: balance;
+    margin-top: 12px;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--rule);
+}
+
+.kb-band-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-top: 20px;
+}
+
+.kb-band-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: var(--radius);
+    background-color: var(--white);
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.kb-band-button:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.kb-band-button:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+
+/* Le bénéfice précède le bouton, en blanc plein : c'est l'argument d'abonnement */
+.kb-band-rhythm { flex-basis: 100%; font-size: 1rem; font-weight: 500; line-height: 1.4; color: var(--white); }
+
+@media (max-width: 767px) {
+    /* Téléphone : bandeau plus court pour que le premier essai remonte dans l'écran */
+    .kb-band-inner { padding-top: 24px; }
+    .kb-band-title { font-size: 1.75rem; line-height: 1.12; }
+    .kb-band-cta { margin-top: 16px; }
+    .kb-band-cover { margin-top: 16px; }
+    /* Un seul appel à l'abonnement sur l'accueil : celui du bandeau */
+    .home-template .kb-nav-secondary { display: none; }
+}
+
+.kb-band-cover {
+    margin: 24px calc(-1 * var(--gutter)) 0;
+}
+
+.kb-band-cover img {
+    width: 100%;
+    aspect-ratio: 40 / 13;
+    object-fit: contain;
+    background-color: var(--navy);
+}
+
+@media (min-width: 1024px) {
+    .kb-band-inner.has-cover {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+        column-gap: 48px;
+        align-items: center;
+        padding-top: 0;
+    }
+    .kb-band-text { padding: 40px 0; }
+    .kb-band-cover { margin: 0; }
+    .kb-band-promise { max-width: none; font-size: 1.25rem; }
+}
+
+/* 5. Accueil
+/* ---------------------------------------------------------- */
+
+.kb-home {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 56px;
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 48px var(--gutter) 0;
+}
+
+.kb-home-side {
+    display: grid;
+    row-gap: 56px;
+    align-content: start;
+}
+
+@media (min-width: 1024px) {
+    .kb-home {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+        grid-template-areas: "essays depeches" "basecamp depeches";
+        grid-template-rows: auto 1fr;
+        column-gap: 72px;
+        padding-top: 64px;
+    }
+    .kb-home-side { display: contents; }
+    .kb-home-essays { grid-area: essays; }
+    .kb-home-depeches { grid-area: depeches; }
+    .kb-home-basecamp { grid-area: basecamp; }
+}
+
+.kb-section-head {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--navy);
+}
+
+.kb-section-title {
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-section-note {
+    margin-top: 4px;
+    font-size: 0.9375rem;
+    color: var(--ink-muted);
+}
+
+.kb-home-subscribe {
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 72px auto 0;
+    padding: 0 var(--gutter);
+}
+
+@media (min-width: 1024px) {
+    .kb-home-subscribe .kb-subscribe {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+        column-gap: 72px;
+        align-items: end;
+        padding: 40px;
+    }
+    .kb-home-subscribe .kb-subscribe > :not(.kb-form) { grid-column: 1; }
+    .kb-home-subscribe .kb-form { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+}
+
+/* 6. Listes (essais, dépêches, parcours)
+/* ---------------------------------------------------------- */
+
+.kb-essays,
+.kb-list { list-style: none; }
+
+.kb-essay,
+.kb-list-item { border-bottom: 1px solid var(--rule); }
+
+.kb-essay-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 8px;
+    padding: 24px 0;
+    text-decoration: none;
+}
+
+.kb-essay-title,
+.kb-list-title {
+    font-family: var(--font-title);
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-essay.is-lead .kb-essay-title {
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
+    line-height: 1.1;
+}
+
+.kb-essay-dek {
+    max-width: 62ch;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--ink-muted);
+}
+
+.kb-essay.is-lead .kb-essay-dek { font-size: 1.1875rem; color: var(--navy); }
+
+.kb-essay-meta {
+    margin-top: 6px;
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+}
+
+.kb-essay-link:hover .kb-essay-title,
+.kb-essay-link:hover .kb-list-title {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+}
+
+@media (min-width: 768px) {
+    .kb-essay-link {
+        grid-template-columns: 136px minmax(0, 1fr);
+        column-gap: 24px;
+        padding: 28px 0;
+    }
+    .kb-essay-date { grid-row: 1 / span 3; padding-top: 0.4em; }
+    .kb-essay-link > :not(.kb-essay-date) { grid-column: 2; }
+}
+
+.kb-compact { list-style: none; }
+.kb-compact li { border-bottom: 1px solid var(--rule); }
+
+.kb-compact-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+    min-height: 44px;
+    padding: 12px 0;
+    text-decoration: none;
+}
+
+
+.kb-compact-title { font-weight: 500; line-height: 1.4; }
+.kb-compact-link:hover .kb-compact-title { text-decoration: underline; text-underline-offset: 0.2em; }
+
+/* Parcours Basecamp de l'accueil : voie d'ascension en tireté-point */
+.kb-route {
+    position: relative;
+    list-style: none;
+    margin-top: 16px;
+}
+
+.kb-route::before {
+    content: "";
+    position: absolute;
+    top: 22px;
+    bottom: 22px;
+    left: 13px;
+    width: 6px;
+    background-image: var(--dashdot-v);
+    background-repeat: repeat-y;
+}
+
+.kb-route a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 48px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.kb-route a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+
+.kb-route + .kb-route-annex { margin-top: 4px; }
+.kb-route-annex a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+
+.kb-route-num {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius);
+    background-color: var(--white);
+    font-family: var(--font-title);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* 7. Abonnement (bloc du thème et carte de l'éditeur)
+/* ---------------------------------------------------------- */
+
+.kb-subscribe {
+    padding: 32px clamp(20px, 4vw, 40px);
+    border-radius: var(--radius);
+    background-color: var(--wash);
+}
+
+.kb-subscribe-title {
+    margin-top: 8px;
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-subscribe-benefit {
+    max-width: 56ch;
+    margin-top: 8px;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+}
+
+.kb-form { margin-top: 20px; max-width: 560px; }
+
+.kb-form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.kb-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.kb-form-input {
+    flex: 1 1 220px;
+    min-width: 0;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius);
+    background-color: var(--white);
+    color: var(--navy);
+    font-size: 1rem;
+}
+
+.kb-form .kb-button { flex: 0 0 auto; height: 48px; padding: 0 22px; font-size: 1rem; }
+
+.kb-form-loading,
+.kb-form-success { display: none; }
+.kb-form.loading .kb-form-default { display: none; }
+.kb-form.loading .kb-form-loading { display: inline; }
+.kb-form.success .kb-form-row { display: none; }
+.kb-form.success .kb-form-success { display: block; margin-top: 8px; font-weight: 500; }
+.kb-form-error:empty { display: none; }
+.kb-form-error { margin-top: 8px; font-size: 0.9375rem; }
+
+/* Une seule occurrence par page de lecture : si le contenu porte sa carte d'inscription, le bloc du thème s'efface */
+.kb-article.has-signup-card .kb-article-end .kb-subscribe { display: none; }
+
+/* Carte d'inscription de l'éditeur, ramenée à la charte (fond clair, bouton bleu nuit, étiquette visible) */
+.gh-content .kg-signup-card {
+    padding: 32px clamp(20px, 4vw, 40px) !important;
+    border-radius: var(--radius) !important;
+    background-color: var(--wash) !important;
+    color: var(--navy) !important;
+    text-align: left !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-content,
+.gh-content .kg-signup-card .kg-signup-card-text { padding: 0 !important; text-align: left !important; align-items: flex-start !important; }
+
+.gh-content .kg-signup-card h2.kg-signup-card-heading {
+    margin: 8px 0 0 !important;
+    font-family: var(--font-title) !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    color: var(--navy) !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-subheading {
+    max-width: 56ch;
+    margin: 8px 0 0 !important;
+    font-family: var(--font-body) !important;
+    font-size: 1.0625rem !important;
+    font-weight: 400 !important;
+    line-height: 1.55 !important;
+    color: var(--navy) !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-form { width: 100%; max-width: 560px; margin: 20px 0 0 !important; }
+
+.gh-content .kg-signup-card .kg-signup-card-fields {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    width: 100% !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-input {
+    flex: 1 1 220px;
+    min-width: 0;
+    height: 48px !important;
+    padding: 0 14px !important;
+    border: 1px solid var(--navy) !important;
+    border-radius: var(--radius) !important;
+    background-color: var(--white) !important;
+    color: var(--navy) !important;
+    font-family: var(--font-body) !important;
+    font-size: 1rem !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-button {
+    flex: 0 0 auto;
+    height: 48px !important;
+    padding: 0 22px !important;
+    border: 0 !important;
+    border-radius: var(--radius) !important;
+    background-color: var(--navy) !important;
+    color: var(--white) !important;
+    font-family: var(--font-body) !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-button:hover { background-color: var(--lava) !important; opacity: 1 !important; }
+.gh-content .kg-signup-card .kg-signup-card-input:focus-visible,
+.gh-content .kg-signup-card .kg-signup-card-button:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 2px !important; }
+
+.gh-content .kg-signup-card :is(.kg-signup-card-disclaimer, .kg-signup-card-success, .kg-signup-card-error) {
+    margin-top: 10px !important;
+    font-size: 0.875rem !important;
+    color: var(--ink-muted) !important;
+    text-align: left !important;
+}
+
+.gh-content .kg-signup-card .kg-signup-card-success { color: var(--navy) !important; font-weight: 500; }
+
+.gh-content .kg-signup-card .kb-form-label { margin-bottom: 6px; color: var(--navy); }
+.gh-content .kg-signup-card .kb-label { margin: 0 !important; }
+
+.gh-content .kg-signup-card .kg-signup-card-button-loading,
+.gh-content .kg-signup-card .kg-signup-card-success { display: none; }
+.gh-content .kg-signup-card .loading .kg-signup-card-button-default { display: none; }
+.gh-content .kg-signup-card .loading .kg-signup-card-button-loading { display: inline-flex; }
+.gh-content .kg-signup-card .loading .kg-signup-card-button-loading svg { width: 24px; height: 24px; fill: currentColor; }
+.gh-content .kg-signup-card .success .kg-signup-card-fields { display: none !important; }
+.gh-content .kg-signup-card .success .kg-signup-card-success { display: block; }
+.gh-content .kg-signup-card .kg-signup-card-error:empty { display: none; }
+
+.gh-content > .kg-signup-card { margin-top: 56px; }
+
+/* 8. Article : en-tête, fil d'Ariane, planche
+/* ---------------------------------------------------------- */
+
+.kb-reading {
+    display: grid;
+    grid-template-columns: [text] minmax(0, 1fr);
+    max-width: calc(var(--measure) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+}
+
+.kb-reading > * { grid-column: text; }
+.kb-reading > .kb-notes { display: none; }
+
+.kb-article-head { padding-top: 32px; }
+
+.kb-crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.kb-crumbs li { display: inline-flex; align-items: center; }
+
+/* Étapes reliées par le tireté-point des voies d'ascension */
+.kb-crumbs li:not(:last-child)::after {
+    content: "";
+    display: inline-block;
+    width: 28px;
+    height: 6px;
+    margin: 0 10px;
+    background-image: var(--dashdot-h);
+    background-repeat: repeat-x;
+    background-position: left center;
+}
+
+.kb-crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+}
+
+.kb-crumbs [aria-current] {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--ink-muted);
+}
+
+/* Étape courante : point plein bleu nuit (l'orange reste réservé aux surfaces de marque) */
+.kb-crumbs [aria-current]::before {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--navy);
+}
+
+.kb-kicker { margin-bottom: 12px; }
+.kb-crumbs + .kb-kicker { margin-top: 12px; }
+
+.kb-title {
+    font-family: var(--font-title);
+    font-size: clamp(2rem, 7vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+
+.kb-crumbs + .kb-title { margin-top: 12px; }
+
+.kb-dek {
+    margin-top: 16px;
+    font-size: 1.1875rem;
+    line-height: 1.5;
+    color: var(--ink-muted);
+}
+
+.kb-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    margin-top: 20px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.9375rem;
+    color: var(--ink-muted);
+}
+
+.kb-meta { column-gap: 10px; }
+.kb-meta > span:not(:last-child)::after { content: "·"; margin-left: 10px; }
+.kb-meta a { color: var(--navy); font-weight: 500; text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+
+.kb-plate { margin-top: 28px; }
+
+.kb-plate img {
+    width: 100%;
+    aspect-ratio: 1734 / 908;
+    object-fit: contain;
+    background-color: var(--white);
+}
+
+.kb-plate-caption {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--ink-muted);
+}
+
+.kb-reading-intro { margin-top: 56px; padding-top: 12px; border-top: 1px solid var(--navy); }
+
+/* Grilles bureau : sommaire dans la marge gauche, puis carnet de notes dans la gouttière droite */
+@media (min-width: 1024px) {
+    .kb-reading {
+        grid-template-columns: [toc] minmax(0, 200px) [text] minmax(0, var(--measure));
+        column-gap: 48px;
+        justify-content: center;
+        max-width: calc(200px + 48px + var(--measure) + 2 * var(--gutter));
+    }
+    .kb-toc { grid-column: toc; grid-row: 1 / span 12; }
+    .kb-article-head { padding-top: 48px; }
+}
+
+@media (min-width: 1240px) {
+    .kb-reading {
+        grid-template-columns: [toc] minmax(0, 200px) [text] minmax(0, var(--measure)) [notes] minmax(0, 220px);
+        max-width: calc(var(--wide) + 2 * var(--gutter));
+    }
+    .kb-reading > .kb-notes { display: block; grid-column: notes; grid-row: 1 / span 12; }
+
+    /* Carnet vide (ni métadonnées ni sources) : la gouttière droite disparaît, la lecture se recentre */
+    .kb-reading.kb-no-notes {
+        grid-template-columns: [toc] minmax(0, 200px) [text] minmax(0, var(--measure));
+        max-width: calc(200px + 48px + var(--measure) + 2 * var(--gutter));
+    }
+    .kb-reading.kb-no-notes > .kb-notes { display: none; }
+}
+
+/* 9. Sommaire et carnet de notes
+/* ---------------------------------------------------------- */
+
+.kb-toc { margin-top: 24px; }
+
+.kb-toc-details {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+}
+
+.kb-toc-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.kb-toc-summary::-webkit-details-marker { display: none; }
+.kb-toc-summary::after { content: "Afficher ↓"; flex: none; margin-left: 16px; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+.kb-toc-details[open] .kb-toc-summary::after { content: "Masquer ↑"; }
+.kb-toc-summary .kb-label { color: var(--navy); }
+
+.kb-toc-nav { padding-bottom: 12px; }
+
+.kb-toc-list {
+    list-style: none;
+    counter-reset: toc;
+    scroll-target-group: auto;
+}
+
+.kb-toc-list li { counter-increment: toc; }
+
+.kb-toc-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 4px 0 4px 12px;
+    border-left: 1px solid var(--rule);
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--ink-muted);
+    text-decoration: none;
+}
+
+.kb-toc-list a::before {
+    content: counter(toc, decimal-leading-zero);
+    flex: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+}
+
+.kb-toc-list a:hover { color: var(--navy); text-decoration: underline; text-underline-offset: 0.2em; }
+
+.kb-toc-list a[aria-current="true"],
+.kb-toc-list a:target-current {
+    margin-left: -1px;
+    border-left: 3px solid var(--navy);
+    color: var(--navy);
+    font-weight: 500;
+}
+
+@media (min-width: 1024px) {
+    .kb-toc { margin-top: 0; padding-top: 48px; }
+    .kb-toc-details {
+        position: sticky;
+        top: 24px;
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+        border: 0;
+    }
+    .kb-toc-summary { min-height: 0; padding-bottom: 8px; cursor: default; pointer-events: none; }
+    .kb-toc-summary::after,
+    .kb-toc-details[open] .kb-toc-summary::after { content: none; }
+    .kb-toc-nav { padding-bottom: 0; }
+    .kb-toc-list a { font-size: 0.875rem; }
+}
+
+
+.kb-notes-meta {
+    padding-top: 48px;
+    font-size: 0.875rem;
+}
+
+.kb-notes-meta dt { margin-top: 16px; }
+.kb-notes-meta dt:first-child { margin-top: 0; }
+.kb-notes-meta dd { margin-top: 2px; }
+.kb-notes-meta a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+
+.kb-notes-sources {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top: 1px solid var(--navy);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--navy);
+}
+
+.kb-notes-meta[hidden] + .kb-notes-sources,
+.kb-notes > .kb-notes-sources:first-child { margin-top: 48px; }
+
+.kb-notes-body ul,
+.kb-notes-body ol { list-style: none; counter-reset: note; }
+
+.kb-notes-body li {
+    counter-increment: note;
+    position: relative;
+    padding: 10px 0 10px 24px;
+    border-bottom: 1px solid var(--rule);
+}
+
+.kb-notes-body li::before {
+    content: counter(note);
+    position: absolute;
+    top: 10px;
+    left: 0;
+    font-weight: 500;
+    color: var(--navy);
+}
+
+.kb-notes-body a { color: var(--navy); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+.kb-notes-body strong { font-weight: 500; }
+
+.kb-notes-all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--navy);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+/* 10. Contenu de l'éditeur et cartes kg-*
+/* ---------------------------------------------------------- */
+
+.gh-content {
+    margin-top: 32px;
+    font-size: 1.125rem;
+    line-height: 1.65;
+}
+
+/* Accroche en gras en tête de paragraphe (« Constat. » puis le texte) : intertitre de balayage */
+.gh-content > p > .kb-lead {
+    display: block;
+    margin-bottom: 0.35em;
+    font-size: 1.15em;
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
+}
+.gh-content > p.has-lead { margin-top: 1.9em; }
+.gh-content > :is(h2, h3, h4) + p.has-lead { margin-top: 0.8em; }
+.gh-content hr + h2 { margin-top: 0; padding-top: 0; border-top: 0; }
+
+/* Sources : lien externe signalé */
+.gh-content .kb-sources a[href^="http"]:not([href*="reachingkibo.com"])::after,
+.kb-notes-body a[href^="http"]:not([href*="reachingkibo.com"])::after { content: " \2197"; text-decoration: none; display: inline-block; margin-left: 0.15em; }
+
+@media (min-width: 768px) {
+    .gh-content { font-size: 1.1875rem; }
+}
+
+.gh-content > * + * { margin-top: 1.15em; }
+
+.gh-content > :is(h2, h3, h4) + * { margin-top: 0.75em; }
+
+.gh-content h2 {
+    margin-top: 2.4em;
+    padding-top: 0.9em;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-title);
+    font-size: 1.625rem;
+    font-weight: 700;
+    line-height: 1.25;
+    scroll-margin-top: 24px;
+}
+
+@media (min-width: 768px) {
+    .gh-content h2 { font-size: 1.75rem; }
+}
+
+.gh-content h3 {
+    margin-top: 1.8em;
+    font-family: var(--font-body);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    scroll-margin-top: 24px;
+}
+
+.gh-content h4 { margin-top: 1.6em; font-size: 1.0625rem; font-weight: 700; }
+
+.gh-content > :first-child { margin-top: 0; }
+.gh-content > .kb-stray { display: none; }
+.gh-content > .kb-stray + * { margin-top: 0; }
+
+.gh-content a {
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+}
+
+.gh-content a:hover { text-decoration-thickness: 2px; }
+
+.gh-content strong, .gh-content b { font-weight: 700; }
+
+.gh-content :is(ul, ol) { padding-left: 1.3em; }
+.gh-content li + li { margin-top: 0.5em; }
+.gh-content li :is(ul, ol) { margin-top: 0.5em; }
+.gh-content li::marker { color: var(--ink-muted); }
+.gh-content ol ol li { list-style-type: lower-alpha; }
+
+.gh-content blockquote:not([class]) {
+    padding: 2px 0 2px 1.1em;
+    border-left: 2px solid var(--navy);
+    font-style: normal;
+}
+
+/* Note « À propos de cette page » : encart de carnet, pas une citation */
+.gh-content blockquote.kb-aside-note {
+    padding: 20px 24px;
+    border-left: 0;
+    border-radius: var(--radius);
+    background-color: var(--wash);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.gh-content blockquote.kg-blockquote-alt {
+    padding: 0 1em;
+    font-size: 1.25em;
+    font-style: normal;
+    text-align: center;
+    color: var(--navy);
+}
+
+.gh-content hr {
+    height: 1px;
+    margin: 2.4em 0;
+    background-color: var(--rule);
+}
+
+.gh-content hr + * { margin-top: 0; }
+
+.gh-content figure { margin-top: 2em; }
+.gh-content figure + * { margin-top: 2em; }
+.gh-content .kg-image { margin: 0 auto; }
+
+.gh-content figcaption {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--ink-muted);
+}
+
+.gh-content figcaption a { color: var(--ink-muted); }
+
+/* Fleuron de marque (image de l'éditeur) : taille naturelle, centré */
+.gh-content .kg-image-card img[src*="fleuron"] { width: 204px; }
+
+/* Sources et lectures complémentaires : registre de note, plus petit */
+.gh-content .kb-sources,
+.gh-content .kb-further {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+.gh-content .kb-sources li::marker { color: var(--navy); }
+
+/* Sources en bas de page : mêmes numéros et même format que le carnet de la marge */
+.gh-content ul.kb-sources,
+.gh-content ol.kb-sources { list-style: none; padding-left: 0; counter-reset: note; }
+.gh-content .kb-sources > li { counter-increment: note; position: relative; padding: 8px 0 8px 28px; border-bottom: 1px solid var(--rule); }
+.gh-content .kb-sources > li::before { content: counter(note); position: absolute; top: 8px; left: 0; font-weight: 600; color: var(--navy); }
+
+/* Arrivée par « N sources en bas de page ↓ » : la liste reçoit un lavis qui s'efface, pour situer l'œil */
+.gh-content h2#sources { scroll-margin-top: 16px; }
+.gh-content h2#sources:target ~ .kb-sources { animation: kb-arrivee 2.4s ease-out both; }
+@keyframes kb-arrivee { from { background-color: var(--wash); } to { background-color: transparent; } }
+@media (prefers-reduced-motion: reduce) {
+    .gh-content h2#sources:target ~ .kb-sources { animation: none; background-color: var(--wash); }
+}
+
+@media (max-width: 767px) {
+    /* Téléphone : sources lisibles et touchables, une entrée par cible de 44 px */
+    .gh-content .kb-sources { font-size: 1rem; }
+    .gh-content .kb-sources > li { min-height: 44px; padding: 12px 0 12px 28px; }
+    .gh-content .kb-sources > li::before { top: 12px; }
+}
+
+/* Pour aller plus loin : liens internes, marqués d'une flèche, distincts des sources externes */
+.gh-content .kb-further a:not([href^="http"])::after,
+.gh-content .kb-further a[href*="reachingkibo.com"]::after { content: " \2192"; text-decoration: none; display: inline-block; margin-left: 0.15em; }
+
+.gh-content :not(pre) > code {
+    padding: 0.1em 0.3em;
+    border-radius: var(--radius);
+    background-color: var(--wash);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+.gh-content pre {
+    overflow-x: auto;
+    padding: 16px;
+    border-radius: var(--radius);
+    background-color: var(--wash);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.gh-content .gh-table { overflow-x: auto; }
+.gh-content table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.gh-content :is(th, td) { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.gh-content th { font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+
+/* Largeurs de cartes : la colonne de lecture reste la règle (planche dans la colonne) */
+.gh-content .kg-width-wide,
+.gh-content .kg-width-full { width: 100%; max-width: 100%; }
+.gh-content .kg-width-full img,
+.gh-content .kg-width-wide img { width: 100%; }
+
+.kg-embed-card { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+.gh-content .kg-callout-card {
+    border-radius: var(--radius) !important;
+    background-color: var(--wash) !important;
+    color: var(--navy) !important;
+}
+
+.gh-content .kg-toggle-card {
+    border: 1px solid var(--rule) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: none !important;
+    background-color: var(--white) !important;
+}
+
+.gh-content .kg-toggle-card .kg-toggle-heading-text { font-size: 1.125rem; font-weight: 700; color: var(--navy); }
+
+.gh-content .kg-bookmark-card a.kg-bookmark-container {
+    border: 1px solid var(--rule) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: none !important;
+    background-color: var(--white) !important;
+    color: var(--navy) !important;
+    text-decoration: none;
+}
+
+.gh-content .kg-bookmark-card :is(.kg-bookmark-description, .kg-bookmark-metadata) { color: var(--ink-muted) !important; }
+
+.gh-content .kg-button-card .kg-btn,
+.gh-content .kg-product-card a.kg-product-card-button {
+    min-height: 48px;
+    border-radius: var(--radius) !important;
+    background-color: var(--navy) !important;
+    color: var(--white) !important;
+    text-decoration: none;
+}
+
+.gh-content .kg-header-card { border-radius: var(--radius); }
+
+.gh-content .kg-file-card .kg-file-card-container {
+    border: 1px solid var(--rule) !important;
+    border-radius: var(--radius) !important;
+    background-color: var(--white) !important;
+    color: var(--navy) !important;
+}
+
+/* 11. Fin de lecture : abonnement, chapitre, suite
+/* ---------------------------------------------------------- */
+
+.kb-article-end { margin-top: 40px; }
+.kb-article-end > .kb-swell:first-child { margin-top: 0; }
+
+.kb-comments { margin-top: 48px; }
+
+/* Chapitre suivant / précédent (pages de chapitre) */
+.kb-sequel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
+.kb-sequel-link {
+    display: grid;
+    row-gap: 4px;
+    min-height: 72px;
+    padding: 16px 20px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    text-decoration: none;
+}
+
+.kb-sequel-link:hover { border-color: var(--navy); }
+.kb-sequel-link.is-next { text-align: right; }
+
+.kb-sequel-title {
+    font-family: var(--font-title);
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+@media (min-width: 600px) {
+    .kb-sequel { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+.kb-sequel + .kb-subscribe { margin-top: 48px; }
+
+/* Pages du chapitre (pages Basecamp) */
+.kb-chapter-pages-title {
+    margin-top: 6px;
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-next-progress {
+    margin-top: 8px;
+    font-size: 0.9375rem;
+    color: var(--ink-muted);
+}
+
+.kb-next-list,
+.kb-route-list {
+    position: relative;
+    list-style: none;
+    margin-top: 16px;
+}
+
+/* Voie du chapitre : tireté-point vertical reliant les étapes */
+.kb-next-list::before,
+.kb-route-list::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    bottom: 18px;
+    left: 4px;
+    width: 6px;
+    background-image: var(--dashdot-v);
+    background-repeat: repeat-y;
+}
+
+.kb-next-list li,
+.kb-route-list li {
+    position: relative;
+    padding-left: 28px;
+}
+
+.kb-next-list li::before,
+.kb-route-list li::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--navy);
+    border-radius: 50%;
+    background-color: var(--white);
+}
+
+.kb-next-list li.is-current::before,
+.kb-route-list li.is-current::before { background-color: var(--navy); }
+
+.kb-next-list a {
+    display: grid;
+    row-gap: 4px;
+    min-height: 44px;
+    padding: 10px 0 14px;
+    text-decoration: none;
+}
+
+.kb-next-step { color: var(--ink-muted); }
+
+.kb-next-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.kb-next-list a:hover .kb-next-title { text-decoration: underline; text-underline-offset: 0.2em; }
+
+.kb-next-excerpt {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ink-muted);
+}
+
+.kb-next-list li.is-current .kb-next-current {
+    display: grid;
+    row-gap: 4px;
+    padding: 10px 0 14px;
+}
+
+.kb-route-all {
+    margin-top: 24px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+}
+
+.kb-route-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+}
+
+.kb-route-summary::-webkit-details-marker { display: none; }
+/* Libellé explicite plutôt qu'un « + » : l'action se lit sans deviner */
+.kb-route-summary::after { content: "Afficher ↓"; flex: none; margin-left: 16px; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+.kb-route-all[open] .kb-route-summary::after { content: "Masquer ↑"; }
+.kb-route-summary:hover::after { color: var(--navy); }
+
+.kb-route-list { margin: 8px 0 16px; }
+
+.kb-route-list a,
+.kb-route-list [aria-current] {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+
+.kb-route-list a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.kb-route-list li.is-current a { font-weight: 700; }
+
+.kb-chapter-pages + .kb-more,
+.kb-chapter-pages .kb-more { margin-top: 20px; }
+
+.kb-article-end > .kb-subscribe + .kb-swell { margin-top: 56px; }
+
+/* À lire ensuite (posts) */
+.kb-after-inner {
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+}
+
+.kb-after-title {
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-after-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    margin-top: 20px;
+}
+
+.kb-after-grid > div > .kb-label { padding-bottom: 8px; border-bottom: 1px solid var(--navy); }
+.kb-after-note { margin-top: 12px; color: var(--ink-muted); }
+
+@media (min-width: 900px) {
+    .kb-after-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; }
+}
+
+/* 12. Hub : table des matières de livre
+/* ---------------------------------------------------------- */
+
+.kb-hub > .kb-article-head {
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+}
+
+.kb-hub > .kb-article-head .kb-dek { max-width: 60ch; }
+
+@media (min-width: 1024px) {
+    .kb-hub-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+        column-gap: 64px;
+        align-items: end;
+    }
+    .kb-hub-head .kb-plate { margin-top: 0; }
+}
+
+.kb-book {
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 40px auto 0;
+    padding: 0 var(--gutter);
+}
+
+.kb-book-title {
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--navy);
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-book-list { list-style: none; }
+
+.kb-book-chapter {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.kb-book-num {
+    font-family: var(--font-title);
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.kb-book-chapter.is-annex .kb-book-num::before {
+    content: "";
+    display: block;
+    width: 24px;
+    height: 24px;
+    margin-top: 4px;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius);
+}
+
+.kb-book-chapter-title a {
+    display: grid;
+    row-gap: 4px;
+    min-height: 44px;
+    text-decoration: none;
+}
+
+.kb-book-chapter-name {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kb-book-chapter-title a:hover .kb-book-chapter-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+
+.kb-book-dek {
+    max-width: 70ch;
+    margin-top: 8px;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--ink-muted);
+}
+
+.kb-book-count {
+    margin-top: 16px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+/* Pages du chapitre en ligne, comme l'index d'un livre */
+.kb-book-pages {
+    max-width: 90ch;
+    margin-top: 6px;
+    list-style: none;
+    font-size: 0.9375rem;
+    line-height: 1.9;
+}
+
+.kb-book-pages li { display: inline; }
+.kb-book-pages li + li::before { content: " · "; color: var(--ink-muted); }
+
+.kb-book-pages a {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+
+.kb-book-pages a:hover { text-decoration-color: var(--navy); }
+
+@media (min-width: 768px) {
+    .kb-book-chapter { grid-template-columns: 112px minmax(0, 1fr); column-gap: 24px; padding: 36px 0; }
+    .kb-book-num { font-size: 3rem; }
+    .kb-book-chapter-name { font-size: 1.75rem; }
+}
+
+.kb-reading-hub { margin-top: 24px; }
+
+/* 13. Archives, pagination
+/* ---------------------------------------------------------- */
+
+.kb-archive {
+    max-width: calc(900px + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+}
+
+.kb-archive-head { padding: 48px 0 24px; border-bottom: 1px solid var(--navy); }
+.kb-archive .kb-list { margin-top: 8px; }
+
+.kb-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.kb-pagination-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.kb-pagination-link:hover { background-color: var(--navy); color: var(--white); }
+
+/* 14. Pied de page (surface de marque)
+/* ---------------------------------------------------------- */
+
+.kb-footer {
+    margin-top: 96px;
+    background-color: var(--navy);
+    color: var(--white);
+}
+
+.kb-footer-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    max-width: calc(var(--wide) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 48px var(--gutter) 40px;
+}
+
+.kb-footer-title {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-decoration: none;
+}
+
+.kb-footer-promise {
+    max-width: 40ch;
+    text-wrap: balance;
+    margin-top: 8px;
+    color: var(--on-navy-muted);
+}
+
+.kb-footer-nav { display: grid; gap: 0; align-content: start; }
+.kb-footer-nav .nav { list-style: none; }
+
+.kb-footer-nav a,
+.kb-footer-social {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--white);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.kb-footer-nav a:hover,
+.kb-footer-social:hover { text-decoration: underline; text-underline-offset: 0.25em; }
+
+.kb-footer-meta {
+    display: grid;
+    align-content: start;
+    font-size: 0.875rem;
+    color: var(--on-navy-muted);
+}
+
+.kb-footer-copy { margin-top: 8px; }
+
+@media (min-width: 768px) {
+    .kb-footer-inner {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 2fr) minmax(0, 2fr);
+        gap: 72px;
+        padding-top: 64px;
+        padding-bottom: 56px;
+        border-top: 0;
+    }
+}
+
+/* Bandeau d'accueil : seconde porte, vers Basecamp, en lien de texte (l'abonnement reste le seul bouton) */
+.kb-band-explore { margin-top: 14px; font-size: 1rem; color: var(--rule); }
+.kb-band-explore a { display: inline-flex; align-items: center; min-height: 44px; color: var(--white); font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+.kb-band-explore a:hover { text-decoration-thickness: 2px; }
+
+/* Page introuvable : trois points sûrs pour repartir, reliés comme une voie */
+.kb-error {
+    max-width: calc(var(--reading, 720px) + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 56px var(--gutter) 72px;
+}
+.kb-error-routes { margin-top: 40px; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
+.kb-error-routes li { border-bottom: 1px solid var(--rule); }
+.kb-error-routes a,
+.kb-error-search {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    min-height: 44px;
+    padding: 16px 0;
+    border: 0;
+    background: none;
+    color: var(--navy);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+.kb-error-route { font-size: 1.125rem; font-weight: 500; }
+.kb-error-routes a:hover .kb-error-route,
+.kb-error-search:hover .kb-error-route { text-decoration: underline; text-underline-offset: 0.2em; }
+
+/* Impression : une planche de carnet, sans interface ; adresses des sources écrites en clair */
+@page { margin: 18mm 16mm; }
+@media print {
+    .kb-nav, .kb-footer, .kb-skip, .kb-subscribe, .kb-home-subscribe, .kb-toc, .kb-notes,
+    .kb-chapter-pages, .kb-sequel, .kb-band-cta, .kb-band-explore, #ghost-portal-root, .gh-portal-triggerbtn-iframe { display: none !important; }
+    html, body { background: #fff !important; color: var(--navy) !important; }
+    body { font-size: 11pt; }
+    .kb-band { background: #fff !important; color: var(--navy) !important; }
+    .kb-article-head::before { content: "Reaching Kibo · reachingkibo.com"; display: block; margin-bottom: 8mm; font-size: 8pt; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+    .gh-content a { color: var(--navy); text-decoration: underline; }
+    .gh-content .kb-sources a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; word-break: break-all; }
+    .gh-content h2, .gh-content h3 { break-after: avoid; }
+    .gh-content p, .gh-content li, .gh-content blockquote, .kb-plate { break-inside: avoid; }
+    .kb-plate img { max-height: 90mm; width: auto; }
+}
+
+/* 12. Signatures Kibo
+/* ---------------------------------------------------------- */
+
+/* S1 · Cartouche de page : bloc-titre de carte topographique, double filet, numéro de chapitre en stencil */
+.kb-cart {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    margin: 28px 4px 0;
+    border: 1px solid var(--navy);
+    outline: 1px solid var(--navy);
+    outline-offset: 3px;
+}
+.kb-cart-big { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 12px 18px; border-right: 1px solid var(--navy); }
+.kb-cart-big span:first-child { font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+.kb-cart-big span:last-child { font-family: var(--font-title); font-size: 3rem; font-weight: 800; line-height: 1; letter-spacing: 0.04em; color: var(--navy); }
+.kb-cart-body { padding: 12px 16px; }
+.kb-cart-head { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); }
+.kb-cart dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin: 0; }
+.kb-cart dt { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.kb-cart dd { margin: 2px 0 0; font-weight: 500; color: var(--navy); }
+.kb-cart dd a { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; color: var(--navy); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+
+/* S2 · Grand numéro stencil des sections, avec filet ; au-dessus de l'intertitre (la marge gauche porte le sommaire) */
+.kb-basecamp .gh-content { counter-reset: kb-sec; }
+.kb-basecamp .gh-content > h2 { counter-increment: kb-sec; padding-top: 14px; border-top: 1px solid var(--navy); }
+.kb-basecamp .gh-content > h2::before {
+    content: counter(kb-sec, decimal-leading-zero);
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--font-title);
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--navy);
+}
+
+/* S3 · Voie d'ascension à camps : page courante en orange, sommet en losange */
+.kb-next-list li.is-current::before { border-color: var(--orange); background-color: var(--orange); }
+.kb-next-list li.is-summit::before { border-radius: 0; transform: rotate(45deg); background-color: var(--navy); }
+.kb-next-list li.is-summit { margin-top: 20px; }
+/* Camps cliquables : le titre se lit comme un lien (la page courante et le sommet restent du texte) */
+.kb-next-list a .kb-next-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.kb-next-list a:hover .kb-next-title { text-decoration-thickness: 2px; }
+.kb-next-list a .kb-next-title::after { content: " →"; }
+.kb-next-list li.is-summit .kb-next-current { display: grid; row-gap: 4px; padding: 10px 0 14px; }
+
+/* Recherche visible (hub, accueil) : un champ lisible plutôt qu'une loupe seule */
+.kb-search-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 480px;
+    min-height: 48px;
+    margin-top: 20px;
+    padding: 0 14px;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius);
+    background: var(--white);
+    color: var(--ink-muted);
+    font: inherit;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+}
+.kb-search-field svg { flex: none; width: 18px; height: 18px; color: var(--navy); }
+.kb-search-field:hover { color: var(--navy); }
+.kb-search-field:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+.kb-home-basecamp .kb-search-field { margin: 12px 0 8px; }
+

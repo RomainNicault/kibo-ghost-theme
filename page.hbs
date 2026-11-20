@@ -1,0 +1,111 @@
+{{!< default}}
+{{!--
+    Pages Ghost. Quatre cas :
+    - hub Basecamp (slug basecamp) : table des matières de livre, puis l'introduction ;
+    - page de chapitre (slug d'un chapitre) : fil d'Ariane, contenu, chapitre suivant ;
+    - page Basecamp (page avec un tag principal = chapitre) : fil d'Ariane, sommaire, pages du chapitre ;
+    - autre page (À propos…) : lecture simple.
+--}}
+
+{{#post}}
+
+{{#has slug="basecamp"}}
+
+<article class="kb-article kb-hub {{post_class}}">
+    <header class="kb-article-head kb-hub-head">
+        <div class="kb-hub-head-text">
+            <p class="kb-label kb-kicker">Le playbook Reaching Kibo</p>
+            <h1 class="kb-title">{{title}}</h1>
+            {{#if custom_excerpt}}<p class="kb-dek">{{custom_excerpt}}</p>{{/if}}
+            {{> "kb-search-field"}}
+        </div>
+        {{> "kb-plate"}}
+    </header>
+
+    {{> "kb-hub-toc"}}
+
+    <div class="kb-reading kb-reading-hub">
+        <p class="kb-label kb-reading-intro">Introduction</p>
+        {{> "kb-reading" noPlate=true}}
+    </div>
+</article>
+
+{{else}}{{#has slug="acquisition,pilotage,notoriete,strategie,canaux,sources"}}
+
+<article class="kb-article kb-chapter {{post_class}}">
+    <div class="kb-reading">
+        <header class="kb-article-head">
+            <nav class="kb-crumbs" aria-label="Fil d'Ariane">
+                <ol>
+                    <li><a href="{{@site.url}}/basecamp/">Basecamp</a></li>
+                    <li><span aria-current="page">{{> "kb-chapter-label" s=slug fallback=title}}</span></li>
+                </ol>
+            </nav>
+            <p class="kb-label kb-kicker">{{> "kb-chapter-num" s=slug}}</p>
+            <h1 class="kb-title">{{title}}</h1>
+            {{#if custom_excerpt}}<p class="kb-dek">{{custom_excerpt}}</p>{{/if}}
+        </header>
+        {{> "kb-reading"}}
+        <footer class="kb-article-end">
+            {{> "kb-swell"}}
+            {{> "kb-chapter-next" s=slug}}
+            {{> "kb-subscribe" id="kb-email-chapitre"}}
+        </footer>
+    </div>
+</article>
+
+{{else}}{{#if primary_tag}}
+
+<article class="kb-article kb-basecamp {{post_class}}">
+    <div class="kb-reading">
+        <header class="kb-article-head">
+            <nav class="kb-crumbs" aria-label="Fil d'Ariane">
+                <ol>
+                    <li><a href="{{@site.url}}/basecamp/">Basecamp</a></li>
+                    {{#match slug "!=" primary_tag.slug}}<li><a href="{{@site.url}}/basecamp/{{primary_tag.slug}}/">{{> "kb-chapter-label" s=primary_tag.slug fallback=primary_tag.name}}</a></li>{{/match}}
+                    <li><span aria-current="page">{{title}}</span></li>
+                </ol>
+            </nav>
+            <h1 class="kb-title">{{title}}</h1>
+            {{#if custom_excerpt}}<p class="kb-dek">{{custom_excerpt}}</p>{{/if}}
+            {{!-- Signature S1 : cartouche de page, comme le bloc-titre d'une carte topographique --}}
+            <div class="kb-cart" data-kb-cart>
+                <div class="kb-cart-big" aria-hidden="true"><span>Chap.</span><span>{{> "kb-chapter-digits" s=primary_tag.slug}}</span></div>
+                <div class="kb-cart-body">
+                    <p class="kb-cart-head">Basecamp · relevé de terrain</p>
+                    <dl>
+                        <div><dt>{{> "kb-chapter-num" s=primary_tag.slug}}</dt><dd>{{> "kb-chapter-label" s=primary_tag.slug fallback=primary_tag.name}}</dd></div>
+                        <div><dt>Relevé le</dt><dd><time datetime="{{date updated_at format="YYYY-MM-DD"}}">{{date updated_at format="D MMMM YYYY"}}</time></dd></div>
+                        <div><dt>Lecture</dt><dd>{{reading_time minute="1 min" minutes="% min"}}</dd></div>
+                        <div data-kb-cart-sources hidden><dt>Sources</dt><dd></dd></div>
+                    </dl>
+                </div>
+            </div>
+        </header>
+        {{!-- Carnet sans chapitre ni date : le cartouche S1 les porte déjà --}}
+        {{> "kb-reading"}}
+        <footer class="kb-article-end">
+            {{> "kb-subscribe" id="kb-email-page"}}
+            {{> "kb-swell"}}
+            {{> "kb-chapter-pages"}}
+        </footer>
+    </div>
+</article>
+
+{{else}}
+
+<article class="kb-article kb-plain {{post_class}}">
+    <div class="kb-reading">
+        {{#match @page.show_title_and_feature_image}}
+            <header class="kb-article-head">
+                <h1 class="kb-title">{{title}}</h1>
+                {{#if custom_excerpt}}<p class="kb-dek">{{custom_excerpt}}</p>{{/if}}
+            </header>
+        {{/match}}
+        {{> "kb-reading"}}
+    </div>
+</article>
+
+{{/if}}{{/has}}{{/has}}
+
+{{/post}}

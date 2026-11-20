@@ -1,0 +1,113 @@
+{{!< default}}
+{{!-- Accueil « Carnet de terrain » : bandeau de marque court, sommaire des essais,
+      dépêches en liste compacte, accès Basecamp, un seul bloc d'abonnement. --}}
+
+<section class="kb-band" aria-labelledby="kb-band-title">
+    <div class="kb-band-inner{{#if @site.cover_image}} has-cover{{/if}}">
+        <div class="kb-band-text">
+            {{!-- Le nom du site est déjà dans la barre de navigation : le bandeau porte la promesse comme titre --}}
+            <h1 class="kb-band-title" id="kb-band-title">{{#if @site.description}}{{@site.description}}{{else}}{{@site.title}}<span class="kb-dot" aria-hidden="true"></span>{{/if}}</h1>
+            {{#if @site.members_enabled}}{{#unless @member}}
+            <p class="kb-band-cta">
+                <span class="kb-band-rhythm">Chaque semaine : un mécanisme, un cas, une question.</span>
+                <a class="kb-band-button" href="#/portal/signup" data-portal="signup">Recevoir la newsletter</a>
+            </p>
+            {{/unless}}{{/if}}
+            <p class="kb-band-explore">Ou explore <a href="{{@site.url}}/basecamp/">Basecamp, le playbook en accès libre →</a></p>
+        </div>
+        {{#if @site.cover_image}}
+            <figure class="kb-band-cover">
+                <img
+                    srcset="{{img_url @site.cover_image size="m" format="webp"}} 600w,
+                            {{img_url @site.cover_image size="l" format="webp"}} 960w,
+                            {{img_url @site.cover_image size="xl" format="webp"}} 1200w,
+                            {{img_url @site.cover_image size="xxl" format="webp"}} 2000w"
+                    sizes="(min-width: 1024px) 680px, 100vw"
+                    src="{{img_url @site.cover_image size="xl"}}"
+                    alt=""
+                    fetchpriority="high"
+                    decoding="async"
+                >
+            </figure>
+        {{/if}}
+    </div>
+</section>
+
+<div class="kb-home">
+
+    <section class="kb-home-essays" aria-labelledby="kb-essais">
+        <header class="kb-section-head">
+            <h2 class="kb-section-title" id="kb-essais">Essais</h2>
+            <p class="kb-section-note">Les textes de fond, à lire en entier.</p>
+        </header>
+        {{#get "posts" filter="slug:-~'depeche-basecamp'" include="authors" limit="6" as |essays|}}
+            {{#if essays}}
+                <ol class="kb-essays">
+                    {{#foreach essays}}
+                        <li class="kb-essay{{#if @first}} is-lead{{/if}}">
+                            <a class="kb-essay-link" href="{{url}}">
+                                <time class="kb-label kb-essay-date" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMMM YYYY"}}</time>
+                                <h3 class="kb-essay-title">{{title}}</h3>
+                                <p class="kb-essay-meta">Essai · {{authors autolink="false"}} · {{reading_time minute="1 min de lecture" minutes="% min de lecture"}}</p>
+                                {{#if custom_excerpt}}
+                                    <p class="kb-essay-dek">{{custom_excerpt}}</p>
+                                {{else}}
+                                    <p class="kb-essay-dek">{{excerpt words="34"}}…</p>
+                                {{/if}}
+                            </a>
+                        </li>
+                    {{/foreach}}
+                </ol>
+            {{else}}
+                <p class="kb-empty">Les premiers essais arrivent bientôt.</p>
+            {{/if}}
+        {{/get}}
+    </section>
+
+    <aside class="kb-home-side">
+
+        <section class="kb-home-depeches" aria-labelledby="kb-depeches">
+            <header class="kb-section-head">
+                <h2 class="kb-section-title" id="kb-depeches">Dépêches</h2>
+                <p class="kb-section-note">Chaque semaine, les nouvelles pages de Basecamp.</p>
+            </header>
+            {{#get "posts" filter="slug:~'depeche-basecamp'" limit="6" as |depeches|}}
+                {{#if depeches}}
+                    <ul class="kb-compact">
+                        {{#foreach depeches}}
+                            <li>
+                                <a class="kb-compact-link" href="{{url}}">
+                                    <time class="kb-label" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMM"}}</time>
+                                    <span class="kb-compact-title">{{title}}</span>
+                                </a>
+                            </li>
+                        {{/foreach}}
+                    </ul>
+                {{/if}}
+            {{/get}}
+            <p class="kb-more"><a href="{{@site.url}}/page/2/">Toutes les publications</a></p>
+        </section>
+
+        <section class="kb-home-basecamp" aria-labelledby="kb-basecamp">
+            <header class="kb-section-head">
+                <h2 class="kb-section-title" id="kb-basecamp">Basecamp</h2>
+                <p class="kb-section-note">Le playbook en accès libre : concepts, lois empiriques et méthodes, avec leurs sources.</p>
+            </header>
+            {{> "kb-search-field"}}
+            <ol class="kb-route">
+                <li><a href="{{@site.url}}/basecamp/acquisition/"><span class="kb-route-num">1</span> Acquisition</a></li>
+                <li><a href="{{@site.url}}/basecamp/pilotage/"><span class="kb-route-num">2</span> Pilotage</a></li>
+                <li><a href="{{@site.url}}/basecamp/notoriete/"><span class="kb-route-num">3</span> Brand building</a></li>
+                <li><a href="{{@site.url}}/basecamp/strategie/"><span class="kb-route-num">4</span> Stratégie</a></li>
+            </ol>
+            <p class="kb-route-annex">Et le catalogue : <a href="{{@site.url}}/basecamp/canaux/">chaque canal en pratique</a></p>
+            <p class="kb-more"><a href="{{@site.url}}/basecamp/">Table des matières de Basecamp</a></p>
+        </section>
+
+    </aside>
+
+</div>
+
+<div class="kb-home-subscribe">
+    {{> "kb-subscribe" id="kb-email-accueil"}}
+</div>

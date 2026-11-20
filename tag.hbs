@@ -1,0 +1,11 @@
+{{!< default}}
+<section class="kb-archive">
+    {{#tag}}
+        <header class="kb-archive-head">
+            <p class="kb-label kb-kicker">Thème</p>
+            <h1 class="kb-title">{{name}}</h1>
+            {{#if description}}<p class="kb-dek">{{description}}</p>{{/if}}
+        </header>
+    {{/tag}}
+    {{> "kb-list"}}
+</section>

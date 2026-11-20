@@ -1,0 +1,22 @@
+{{!-- Suite logique entre chapitres : précédent / suivant, reliés par le tireté-point. Paramètre : s (slug du chapitre). --}}
+<nav class="kb-sequel" aria-label="Chapitres de Basecamp">
+{{#match s "acquisition"}}
+    <a class="kb-sequel-link is-prev" href="{{@site.url}}/basecamp/"><span class="kb-label">Retour</span><span class="kb-sequel-title">Table des matières</span></a>
+    <a class="kb-sequel-link is-next" href="{{@site.url}}/basecamp/pilotage/"><span class="kb-label">Suivant · Chapitre 2</span><span class="kb-sequel-title">Pilotage</span></a>
+{{else match s "pilotage"}}
+    <a class="kb-sequel-link is-prev" href="{{@site.url}}/basecamp/acquisition/"><span class="kb-label">Précédent · Chapitre 1</span><span class="kb-sequel-title">Acquisition</span></a>
+    <a class="kb-sequel-link is-next" href="{{@site.url}}/basecamp/notoriete/"><span class="kb-label">Suivant · Chapitre 3</span><span class="kb-sequel-title">Brand building</span></a>
+{{else match s "notoriete"}}
+    <a class="kb-sequel-link is-prev" href="{{@site.url}}/basecamp/pilotage/"><span class="kb-label">Précédent · Chapitre 2</span><span class="kb-sequel-title">Pilotage</span></a>
+    <a class="kb-sequel-link is-next" href="{{@site.url}}/basecamp/strategie/"><span class="kb-label">Suivant · Chapitre 4</span><span class="kb-sequel-title">Stratégie</span></a>
+{{else match s "strategie"}}
+    <a class="kb-sequel-link is-prev" href="{{@site.url}}/basecamp/notoriete/"><span class="kb-label">Précédent · Chapitre 3</span><span class="kb-sequel-title">Brand building</span></a>
+    <a class="kb-sequel-link is-next" href="{{@site.url}}/basecamp/canaux/"><span class="kb-label">Suivant · Catalogue</span><span class="kb-sequel-title">Canaux</span></a>
+{{else match s "canaux"}}
+    <a class="kb-sequel-link is-prev" href="{{@site.url}}/basecamp/strategie/"><span class="kb-label">Précédent · Chapitre 4</span><span class="kb-sequel-title">Stratégie</span></a>
+    <a class="kb-sequel-link is-next" href="{{@site.url}}/basecamp/sources/"><span class="kb-label">Suivant · Index</span><span class="kb-sequel-title">Sources</span></a>
+{{else match s "sources"}}
+    <a class="kb-sequel-link is-prev" href="{{@site.url}}/basecamp/canaux/"><span class="kb-label">Précédent · Catalogue</span><span class="kb-sequel-title">Canaux</span></a>
+    <a class="kb-sequel-link is-next" href="{{@site.url}}/basecamp/"><span class="kb-label">Retour</span><span class="kb-sequel-title">Table des matières</span></a>
+{{/match}}
+</nav>

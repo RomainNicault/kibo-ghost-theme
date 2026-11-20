@@ -1,0 +1,9 @@
+<nav class="kb-pagination" aria-label="Pagination">
+    {{#if prev}}
+        <a class="kb-pagination-link" href="{{page_url prev}}" rel="prev">Plus récents</a>
+    {{/if}}
+    <span class="kb-label">Page {{page}} sur {{pages}}</span>
+    {{#if next}}
+        <a class="kb-pagination-link" href="{{page_url next}}" rel="next">Plus anciens</a>
+    {{/if}}
+</nav>

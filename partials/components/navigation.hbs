@@ -1,0 +1,23 @@
+<header class="kb-nav">
+    <div class="kb-nav-inner">
+        <a class="kb-nav-brand" href="{{@site.url}}">{{@site.title}}</a>
+
+        <nav class="kb-nav-primary" aria-label="Navigation principale">
+            {{navigation}}
+        </nav>
+
+        <div class="kb-nav-actions">
+            <button class="kb-icon-button" type="button" aria-label="Rechercher sur le site" data-ghost-search>
+                {{> "icons/search"}}
+            </button>
+            {{#if @site.members_enabled}}
+                {{#unless @member}}
+                    <a class="kb-nav-signin" href="#/portal/signin" data-portal="signin">Se connecter</a>
+                    <div class="kb-nav-secondary">{{navigation type="secondary"}}</div>
+                {{else}}
+                    <a class="kb-nav-signin" href="#/portal/account" data-portal="account">Mon compte</a>
+                {{/unless}}
+            {{/if}}
+        </div>
+    </div>
+</header>

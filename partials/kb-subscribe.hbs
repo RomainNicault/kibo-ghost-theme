@@ -1,0 +1,26 @@
+{{!--
+    Bloc d'abonnement unique du thème. Sur les pages de lecture, il ne s'affiche
+    que si le contenu ne porte pas déjà sa carte d'inscription (règle CSS :has).
+    Paramètre : id (identifiant unique du champ e-mail).
+--}}
+{{#if @site.members_enabled}}
+{{#unless @member}}
+<section class="kb-subscribe" aria-labelledby="{{id}}-titre">
+    <p class="kb-label">Newsletter hebdomadaire</p>
+    <h2 class="kb-subscribe-title" id="{{id}}-titre">Reaching Kibo, la newsletter</h2>
+    <p class="kb-subscribe-benefit">Chaque semaine : un mécanisme de croissance, un cas, une question à poser à ton équipe. Pas de spam, désabonnement en un clic.</p>
+    <form class="kb-form" data-members-form="signup">
+        <label class="kb-form-label" for="{{id}}">Ton adresse e-mail</label>
+        <div class="kb-form-row">
+            <input class="kb-form-input" id="{{id}}" name="email" type="email" autocomplete="email" required data-members-email>
+            <button class="kb-button" type="submit">
+                <span class="kb-form-default">Je m'abonne</span>
+                <span class="kb-form-loading">Envoi…</span>
+            </button>
+        </div>
+        <p class="kb-form-success" role="status">Merci ! Vérifie ta boîte mail pour confirmer ton inscription.</p>
+        <p class="kb-form-error" data-members-error role="alert"></p>
+    </form>
+</section>
+{{/unless}}
+{{/if}}

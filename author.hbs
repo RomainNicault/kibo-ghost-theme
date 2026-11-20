@@ -1,0 +1,13 @@
+{{!< default}}
+<section class="kb-archive">
+    {{#author}}
+        <header class="kb-archive-head">
+            <p class="kb-label kb-kicker">Auteur</p>
+            <h1 class="kb-title">{{name}}</h1>
+            {{#if bio}}<p class="kb-dek">{{bio}}</p>{{/if}}
+            {{#if website}}<p class="kb-more"><a href="{{website}}" rel="noopener">Site personnel</a></p>{{/if}}
+            {{#if linkedin}}<p class="kb-more"><a href="{{social_url type="linkedin"}}" rel="noopener">LinkedIn</a></p>{{/if}}
+        </header>
+    {{/author}}
+    {{> "kb-list"}}
+</section>

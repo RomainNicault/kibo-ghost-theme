@@ -1,0 +1,12 @@
+{{!-- Polices de la charte Kibo, servies par le thème (Fontshare, licence FFL) --}}
+<link rel="preload" as="font" type="font/woff2" href="{{asset "fonts/Supreme-Regular.woff2"}}" crossorigin="anonymous">
+{{!-- Accueil : le titre du bandeau (800) est le plus grand élément du premier écran --}}
+{{#is "home"}}<link rel="preload" as="font" type="font/woff2" href="{{asset "fonts/BespokeStencil-Extrabold.woff2"}}" crossorigin="anonymous">{{else}}<link rel="preload" as="font" type="font/woff2" href="{{asset "fonts/BespokeStencil-Bold.woff2"}}" crossorigin="anonymous">{{/is}}
+<style>
+    @font-face { font-family: "Supreme"; font-style: normal; font-weight: 400; font-display: swap; src: url({{asset "fonts/Supreme-Regular.woff2"}}) format("woff2"); }
+    @font-face { font-family: "Supreme"; font-style: italic; font-weight: 400; font-display: swap; src: url({{asset "fonts/Supreme-Italic.woff2"}}) format("woff2"); }
+    @font-face { font-family: "Supreme"; font-style: normal; font-weight: 500; font-display: swap; src: url({{asset "fonts/Supreme-Medium.woff2"}}) format("woff2"); }
+    @font-face { font-family: "Supreme"; font-style: normal; font-weight: 700; font-display: swap; src: url({{asset "fonts/Supreme-Bold.woff2"}}) format("woff2"); }
+    @font-face { font-family: "Bespoke Stencil"; font-style: normal; font-weight: 700; font-display: swap; src: url({{asset "fonts/BespokeStencil-Bold.woff2"}}) format("woff2"); }
+    @font-face { font-family: "Bespoke Stencil"; font-style: normal; font-weight: 800; font-display: swap; src: url({{asset "fonts/BespokeStencil-Extrabold.woff2"}}) format("woff2"); }
+</style>

@@ -1,0 +1,35 @@
+{{!--
+    Fin de page Basecamp : suite logique et pages du même chapitre.
+    Le script marque la page courante, calcule précédente / suivante et les 3 pages suivantes (avec leur résumé).
+    Sans script, la liste complète du chapitre reste lisible.
+--}}
+<section class="kb-chapter-pages" aria-labelledby="kb-chapter-pages-title" data-kb-route data-current="{{slug}}">
+    <p class="kb-label">{{> "kb-chapter-num" s=primary_tag.slug}} · {{> "kb-chapter-label" s=primary_tag.slug fallback=primary_tag.name}}</p>
+    <h2 class="kb-chapter-pages-title" id="kb-chapter-pages-title">Dans le même chapitre</h2>
+
+    <div class="kb-next" data-kb-next hidden>
+        <p class="kb-next-progress" data-kb-progress></p>
+        <ol class="kb-next-list" data-kb-next-list></ol>
+    </div>
+
+    {{#get "pages" filter="tag:{{primary_tag.slug}}+slug:-{{primary_tag.slug}}" include="tags" order="title asc" limit="100" as |siblings meta|}}
+        {{#if siblings}}
+            <details class="kb-route-all" data-kb-all>
+                <summary class="kb-route-summary">Toutes les pages du chapitre ({{meta.total}})</summary>
+                <ol class="kb-route-list">
+                    {{#foreach siblings}}
+                        <li data-slug="{{slug}}" data-excerpt="{{#if custom_excerpt}}{{custom_excerpt}}{{else}}{{excerpt words="24"}}…{{/if}}">
+                            <a href="{{@site.url}}/basecamp/{{primary_tag.slug}}/{{slug}}/">{{title}}</a>
+                        </li>
+                    {{/foreach}}
+                </ol>
+            </details>
+        {{else}}
+            <p class="kb-empty">Les autres pages de ce chapitre sont listées sur la page du chapitre.</p>
+        {{/if}}
+    {{else}}
+        <p class="kb-empty">Les autres pages de ce chapitre sont listées sur la page du chapitre.</p>
+    {{/get}}
+
+    <p class="kb-more"><a href="{{@site.url}}/basecamp/{{primary_tag.slug}}/">Ouvrir le chapitre {{> "kb-chapter-label" s=primary_tag.slug fallback=primary_tag.name}}</a></p>
+</section>

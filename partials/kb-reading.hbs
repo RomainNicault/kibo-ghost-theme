@@ -1,0 +1,37 @@
+{{!--
+    Corps de lecture commun (posts, pages Basecamp, hub, chapitres).
+    Grille bureau : sommaire collant à gauche, colonne de lecture ~680 px, carnet de notes à droite.
+    Téléphone : sommaire repliable en tête, notes sous le texte (section Sources du contenu).
+--}}
+<aside class="kb-toc" data-kb-toc>
+    <details class="kb-toc-details">
+        <summary class="kb-toc-summary"><span class="kb-label">Sommaire</span></summary>
+        <nav class="kb-toc-nav" aria-label="Sommaire de la page">
+            <ol class="kb-toc-list"></ol>
+        </nav>
+    </details>
+</aside>
+
+{{#unless noPlate}}{{> "kb-plate"}}{{/unless}}
+
+<div class="gh-content kb-content">
+    {{content}}
+</div>
+
+<aside class="kb-notes" aria-label="Carnet de la page">
+    {{#if notesMeta}}
+        <dl class="kb-notes-meta">
+            {{#if primary_tag}}
+                <dt class="kb-label">Chapitre</dt>
+                <dd><a href="{{@site.url}}/basecamp/{{primary_tag.slug}}/">{{> "kb-chapter-label" s=primary_tag.slug fallback=primary_tag.name}}</a></dd>
+            {{/if}}
+            <dt class="kb-label">Mis à jour</dt>
+            <dd><time datetime="{{date updated_at format="YYYY-MM-DD"}}">{{date updated_at format="D MMMM YYYY"}}</time></dd>
+        </dl>
+    {{/if}}
+    <div class="kb-notes-sources" data-kb-notes hidden>
+        <p class="kb-label kb-notes-title">Sources de la page</p>
+        <div class="kb-notes-body"></div>
+        <a class="kb-notes-all" href="#sources">Voir les sources en bas de page ↓</a>
+    </div>
+</aside>
