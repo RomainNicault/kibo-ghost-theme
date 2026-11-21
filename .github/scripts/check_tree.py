@@ -15,7 +15,7 @@ FORBIDDEN_EXT = (".woff", ".woff2", ".ttf", ".otf", ".eot", ".map")
 PATTERNS = {
     "e-mail address": re.compile(r"[\w.+-]+@(?!users\.noreply\.github\.com)[A-Za-z][\w-]*(?:\.[\w-]+)*\.[A-Za-z]{2,}\b"),
     "absolute local path": re.compile(r"(?<![\w.])/(?:srv|home|Users|root)/[\w.-]+"),
-    "access token": re.compile(r"\b(?:ghp_|gho_|github_pat_|sk-[A-Za-z0-9]{8}|xox[bp]-|AKIA[0-9A-Z]{12})"),
+    "access token": re.compile(r"\b(?:gh[opsur]_|github[_]pat_|sk-[A-Za-z0-9]{8}|xox[bp]-|AKIA[0-9A-Z]{12})"),
     "source map reference": re.compile(r"sourceMappingURL="),
 }
 ALLOWED_EMAILS = frozenset({"hello@ghost.org"})
