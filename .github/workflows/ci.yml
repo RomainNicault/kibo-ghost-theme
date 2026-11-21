@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tracked files
+        run: python3 .github/scripts/check_tree.py
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Build is up to date
+        run: |
+          npx gulp build
+          git diff --exit-code -- assets/built || { echo "::error::assets/built is stale: run npx gulp build and commit"; exit 1; }
+      - name: Ghost theme validator
+        run: npm test
