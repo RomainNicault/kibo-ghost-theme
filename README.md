@@ -29,10 +29,16 @@ Node 22.12 or later, with npm or pnpm.
 
 ```bash
 npm install
-npx gulp build    # assets/built/
-npx gscan .       # Ghost theme validator
+npx gulp build    # assets/built/, committed
+npm test          # gscan, the Ghost theme validator, on a clean copy
 npx gulp zip      # dist/kibo.zip, to upload in Ghost Admin > Settings > Design
 ```
+
+Do not run `gscan .` in the working tree: gscan deletes `.git` and `node_modules` from the folder it checks. `npm test` copies the theme first.
+
+## Contributing
+
+`main` only changes through pull requests. Each pull request runs the CI: tracked-file checks (no font binaries, source maps, personal e-mail addresses, local paths or tokens), a fresh build that must match the committed `assets/built/`, and gscan. Write commit messages in English.
 
 ## License
 
