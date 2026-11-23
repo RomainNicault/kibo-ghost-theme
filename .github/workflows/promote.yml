@@ -57,6 +57,11 @@ jobs:
             seen=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=refused-$sha" --jq .total_count)
             [ "$seen" = 0 ] || action=skip
           fi
+          if [ "$action" = promote ]; then
+            reviewers=$(gh api "repos/$GITHUB_REPOSITORY/environments/promotion" \
+              --jq '[.protection_rules[]? | select(.type == "required_reviewers")] | length' 2>/dev/null || echo 0)
+            [ "$reviewers" -ge 1 ] || { echo "::error::environment promotion has no required reviewer"; exit 1; }
+          fi
           { echo "action=$action"; echo "sha=$sha"; echo "base=$base"; } >> "$GITHUB_OUTPUT"
           echo "Candidate: ${sha:-none}, action: $action" >> "$GITHUB_STEP_SUMMARY"
 
