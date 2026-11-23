@@ -27,6 +27,21 @@ def tracked() -> list[str]:
     return [f for f in out.split("\0") if f]
 
 
+def line_findings(path: str, line: str, placeholders: bool = True) -> list[str]:
+    """Generic findings in one line of a tracked file; `placeholders=False` drops the locales exemption."""
+    found = []
+    for label, rx in PATTERNS.items():
+        if label == "e-mail address" and "@" not in line:
+            continue
+        for m in rx.finditer(line):
+            if label == "e-mail address" and (
+                m.group(0) in ALLOWED_EMAILS or (placeholders and path.startswith(PLACEHOLDER_EMAIL_DIRS))
+            ):
+                continue
+            found.append(f"{label}: {m.group(0)[:60]}")
+    return found
+
+
 def main() -> int:
     findings: list[str] = []
     for path in tracked():
@@ -40,13 +55,7 @@ def main() -> int:
         except UnicodeDecodeError:
             continue
         for no, line in enumerate(text.splitlines(), 1):
-            for label, rx in PATTERNS.items():
-                for m in rx.finditer(line):
-                    if label == "e-mail address" and (
-                        m.group(0) in ALLOWED_EMAILS or path.startswith(PLACEHOLDER_EMAIL_DIRS)
-                    ):
-                        continue
-                    findings.append(f"{path}:{no}: {label}: {m.group(0)[:60]}")
+            findings += [f"{path}:{no}: {f}" for f in line_findings(path, line)]
     for f in findings:
         print(f)
     return 1 if findings else 0
