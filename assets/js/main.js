@@ -341,3 +341,27 @@ kbNotesState();
         emit({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Basecamp · table des matières', url: here, itemListElement: list });
     }
 })();
+
+/* Liens externes : nouvel onglet sur tout le site (choix éditorial). Le navigateur décide du
+   premier ou de l'arrière-plan ; rel="noopener" coupe l'accès de la page ouverte à celle-ci. */
+(function () {
+    var site = location.hostname.replace(/^www\./, '');
+    function isExternal(a) {
+        if (!/^https?:$/.test(a.protocol)) return false;
+        return a.hostname.replace(/^www\./, '') !== site;
+    }
+    function mark(root) {
+        root.querySelectorAll('a[href]').forEach(function (a) {
+            if (!isExternal(a)) return;
+            a.target = '_blank';
+            var rel = (a.getAttribute('rel') || '').split(/\s+/).filter(Boolean);
+            if (rel.indexOf('noopener') < 0) rel.push('noopener');
+            a.setAttribute('rel', rel.join(' '));
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { mark(document); });
+    } else {
+        mark(document);
+    }
+})();
