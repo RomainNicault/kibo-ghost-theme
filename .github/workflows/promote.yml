@@ -1,0 +1,96 @@
+name: Promote
+
+# Publishes one reviewed commit of the private transit repository as a single
+# squashed commit on branch promotion/<sha>, then a pull request is opened by hand.
+# The transit tree is read, never executed. `.github/` always comes from main.
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Transit commit to promote (40 hexadecimal characters)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SHA: ${{ inputs.sha }}
+    steps:
+      - name: Check input
+        run: |
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be 40 lowercase hexadecimal characters"; exit 1; }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch transit commit
+        env:
+          TRANSIT_KEY: ${{ secrets.TRANSIT_DEPLOY_KEY }}
+        run: |
+          set +x
+          key="$RUNNER_TEMP/transit_key"; hosts="$RUNNER_TEMP/known_hosts"
+          install -m 600 /dev/null "$key"
+          printf '%s\n' "$TRANSIT_KEY" > "$key"
+          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$hosts"
+          export GIT_SSH_COMMAND="ssh -i $key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$hosts -o User=git"
+          ok=0
+          git fetch -q --no-tags --depth 1 ssh://github.com/RomainNicault/kibo-ghost-theme-transit.git "$SHA" >/dev/null 2>&1 \
+            && [ "$(git rev-parse FETCH_HEAD)" = "$SHA" ] && ok=1
+          rm -f "$key"
+          [ "$ok" = 1 ] || { echo "::error::transit commit not found"; exit 1; }
+
+      - name: Gate
+        env:
+          PRIVATE_LEXICON: ${{ secrets.PRIVATE_LEXICON }}
+        run: python3 .github/scripts/promote_gate.py "$SHA" "$(git rev-parse HEAD)"
+
+      - name: Build squashed commit
+        id: commit
+        env:
+          GIT_AUTHOR_NAME: Romain Nicault
+          GIT_AUTHOR_EMAIL: RomainNicault@users.noreply.github.com
+          GIT_COMMITTER_NAME: Romain Nicault
+          GIT_COMMITTER_EMAIL: RomainNicault@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          export GIT_INDEX_FILE="$RUNNER_TEMP/promote_index"
+          git read-tree "$SHA"
+          git rm -r -q --cached -f --ignore-unmatch -- .github
+          git read-tree --prefix=.github/ HEAD:.github
+          tree=$(git write-tree)
+          [ "$tree" != "$(git rev-parse 'HEAD^{tree}')" ] || { echo "::error::nothing to promote"; exit 1; }
+          commit=$(printf 'Promote theme update\n\nTransit-Commit: %s\n' "$SHA" | git commit-tree "$tree" -p HEAD)
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        id: app
+        with:
+          app-id: ${{ secrets.PROMOTE_APP_ID }}
+          private-key: ${{ secrets.PROMOTE_APP_KEY }}
+          repositories: kibo-ghost-theme
+          permission-contents: write
+
+      - name: Push promotion branch
+        env:
+          TOKEN: ${{ steps.app.outputs.token }}
+          COMMIT: ${{ steps.commit.outputs.commit }}
+        run: |
+          set +x; set -euo pipefail
+          remote_main=$(git ls-remote "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" refs/heads/main | cut -f1)
+          [ "$remote_main" = "$(git rev-parse HEAD)" ] || { echo "::error::main moved during the run, dispatch again"; exit 1; }
+          helper='!f() { echo username=x-access-token; echo "password=$TOKEN"; }; f'
+          git -c credential.helper= -c credential.helper="$helper" push -q "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "$COMMIT:refs/heads/promotion/$SHA"
+          echo "Open a pull request: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/main...promotion/$SHA" >> "$GITHUB_STEP_SUMMARY"
