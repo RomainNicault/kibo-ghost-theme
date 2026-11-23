@@ -29,3 +29,7 @@ changelog.md.bk
 
 # Fontshare fonts: not redistributable, see README
 assets/fonts/*
+
+# Python bytecode: never committed
+__pycache__/
+*.pyc

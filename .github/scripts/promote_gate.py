@@ -8,9 +8,10 @@ a regular file on the theme allowlist, any binary or non UTF-8 file, any file
 over the size limit, and any path or line matching the generic checks of
 check_tree.py (on lines not already in the same file on main, the
 checked-out base) or the PRIVATE_LEXICON secret (one case-insensitive regular
-expression, matched on raw, NFKC and typography-normalised text, and on the
-whole file with white space removed). `.github/` is not
-promoted: the workflow keeps the one on `main`.
+expression, matched on raw, NFKC and typography-normalised text, on the same
+text with CSS and JavaScript escapes, HTML entities and tags decoded, and on the
+whole file with white space removed). `.github/` is not promoted: the workflow
+keeps the one on `main`.
 
 Public logs must not reveal what was refused: the gate prints only
 "gate passed" or "gate failed", and any error counts as a failure. For local
@@ -19,6 +20,7 @@ workflow never sets it.
 """
 from __future__ import annotations
 
+import html
 import os
 import re
 import subprocess
@@ -41,6 +43,23 @@ TYPOGRAPHY = str.maketrans({
     "\u2013": "-", "\u2014": "-", "\u2212": "-", "\u00ad": "", "\u200b": "", "\u2060": "", "\ufeff": "",
 })
 SEPARATORS = str.maketrans({"-": " ", "_": " "})
+JS_ESCAPE = re.compile(r"\\u\{([0-9a-fA-F]{1,6})\}|\\u([0-9a-fA-F]{4})|\\x([0-9a-fA-F]{2})")
+CSS_ESCAPE = re.compile(r"\\([0-9a-fA-F]{1,6})[ \t\r\n\f]?|\\(.)", re.S)
+TAG = re.compile(r"<[^<>]*>")
+
+
+def _char(code: str) -> str:
+    try:
+        return chr(int(code, 16))
+    except (ValueError, OverflowError):
+        return ""
+
+
+def decoded(text: str) -> str:
+    """Text with JavaScript and CSS escapes, HTML entities and tags undone: catches an encoded term."""
+    text = JS_ESCAPE.sub(lambda m: _char(m.group(1) or m.group(2) or m.group(3)), text)
+    text = CSS_ESCAPE.sub(lambda m: _char(m.group(1)) if m.group(1) else m.group(2), text)
+    return TAG.sub("", html.unescape(text))
 
 
 def git(*args: str) -> bytes:
@@ -50,8 +69,11 @@ def git(*args: str) -> bytes:
 
 
 def private(lexicon: re.Pattern[str], text: str) -> bool:
-    plain = unicodedata.normalize("NFKC", text.translate(TYPOGRAPHY)).casefold()
-    return any(lexicon.search(t) for t in (text, plain, plain.translate(SEPARATORS)))
+    for variant in (text, decoded(text)):
+        plain = unicodedata.normalize("NFKC", variant.translate(TYPOGRAPHY)).casefold()
+        if any(lexicon.search(t) for t in (variant, plain, plain.translate(SEPARATORS))):
+            return True
+    return False
 
 
 def joined(text: str) -> str:
@@ -102,7 +124,7 @@ def refused(sha: str, lexicon: re.Pattern[str], reasons: list[str] | None = None
             refused_any |= no(f"{path}: binary")
             continue
         text = data.decode("utf-8")
-        if lexicon.search(joined(text)):
+        if lexicon.search(joined(text)) or lexicon.search(joined(decoded(text))):
             refused_any |= no(f"{path}: private term (joined)")
         known = base_lines(path)
         for no_, line in enumerate(text.splitlines(), 1):

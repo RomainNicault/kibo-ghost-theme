@@ -1,7 +1,7 @@
 name: Promote
 
 # Publishes one reviewed commit of the private transit repository as a single
-# squashed commit on branch promotion/<sha>, then a pull request is opened by hand.
+# squashed commit on branch promotion/<sha>, then opens its pull request.
 # The transit tree is read, never executed. `.github/` always comes from main.
 
 on:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: promote
+  group: promote-${{ inputs.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -78,10 +78,11 @@ jobs:
       - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app
         with:
-          app-id: ${{ secrets.PROMOTE_APP_ID }}
+          client-id: ${{ vars.PROMOTE_APP_CLIENT_ID }}
           private-key: ${{ secrets.PROMOTE_APP_KEY }}
           repositories: kibo-ghost-theme
           permission-contents: write
+          permission-pull-requests: write
 
       - name: Push promotion branch
         env:
@@ -91,6 +92,12 @@ jobs:
           set +x; set -euo pipefail
           remote_main=$(git ls-remote "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" refs/heads/main | cut -f1)
           [ "$remote_main" = "$(git rev-parse HEAD)" ] || { echo "::error::main moved during the run, dispatch again"; exit 1; }
+          if git ls-remote --exit-code "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "refs/heads/promotion/$SHA" >/dev/null 2>&1; then
+            echo "::error::promotion/$SHA already exists: merge or close its pull request, delete the branch, then dispatch again"; exit 1
+          fi
           helper='!f() { echo username=x-access-token; echo "password=$TOKEN"; }; f'
           git -c credential.helper= -c credential.helper="$helper" push -q "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "$COMMIT:refs/heads/promotion/$SHA"
-          echo "Open a pull request: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/main...promotion/$SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Compare: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/main...promotion/$SHA" >> "$GITHUB_STEP_SUMMARY"
+          body=$(printf 'Promotion of transit commit `%s`.\n\nReview the diff, wait for `check`, then merge with **Rebase and merge** to keep the `Transit-Commit` trailer.\n' "$SHA")
+          url=$(GH_TOKEN="$TOKEN" gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "promotion/$SHA" --title "Promote theme update" --body "$body")
+          echo "Pull request: $url" >> "$GITHUB_STEP_SUMMARY"
