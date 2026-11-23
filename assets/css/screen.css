@@ -1163,6 +1163,90 @@ ul, ol { padding: 0; }
     .gh-content .kb-sources > li::before { top: 12px; }
 }
 
+/* Appels de note vers « Sources » (HTML produit par publish_to_ghost) : numéro en exposant,
+   bleu nuit, même registre que le carnet de la marge ; aucun lien retour. */
+.gh-content a[href^="#fn-"] {
+    color: var(--navy);
+    font-family: var(--font-body);
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.gh-content a[href^="#fn-"] sup {
+    position: relative; /* ancre la cible tactile sur le numéro, pas sur la ligne */
+    font-size: 0.75em;
+    font-weight: 500;
+    line-height: 0; /* l'exposant n'allonge pas l'interligne */
+    vertical-align: baseline;
+    top: -0.36em;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Cible tactile : boîte transparente autour du numéro, hors flux, aucun décalage du texte */
+.gh-content a[href^="#fn-"] sup::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius);
+    background-color: transparent;
+    transition: background-color 150ms ease-out;
+}
+.gh-content a[href^="#fn-"]:hover sup::after,
+.gh-content a[href^="#fn-"]:focus-visible sup::after { background-color: var(--wash); }
+.gh-content a[href^="#fn-"]:focus-visible { outline: none; }
+.gh-content a[href^="#fn-"]:focus-visible sup::after { outline: 2px solid var(--navy); outline-offset: 0; }
+
+@media (max-width: 767px), (pointer: coarse) {
+    .gh-content a[href^="#fn-"] sup::after { width: 44px; height: 44px; }
+}
+
+/* Sources : liste de notes, même numérotation et même registre que le carnet de la marge */
+.gh-content .footnote { margin-top: 16px; font-size: 0.9375rem; line-height: 1.55; }
+.gh-content .footnote > ol { list-style: none; padding-left: 0; counter-reset: note; }
+.gh-content .footnote > ol > li {
+    counter-increment: note;
+    position: relative;
+    padding: 10px 0 10px 36px;
+    border-bottom: 1px solid var(--rule);
+    scroll-margin-top: 36px;
+}
+.gh-content .footnote > ol > li + li { margin-top: 0; }
+.gh-content .footnote > ol > li:last-child { border-bottom: 0; } /* le filet de fin de section suffit */
+.gh-content .footnote > ol > li::before {
+    content: counter(note);
+    position: absolute;
+    top: 10px;
+    left: 10px; /* décollé du repère orange de l'entrée ciblée */
+    font-weight: 600;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+}
+.gh-content .footnote > ol > li > p { margin: 0; }
+
+/* Clic sur un appel : l'entrée atteinte se pose sur un lavis, repère orange à gauche */
+.gh-content .footnote > ol > li:target { background-color: var(--wash); }
+.gh-content .footnote > ol > li:target::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background-color: var(--orange);
+}
+
+@media (max-width: 767px) {
+    .gh-content .footnote { font-size: 1rem; }
+    .gh-content .footnote > ol > li { padding: 12px 0 12px 36px; }
+    .gh-content .footnote > ol > li::before { top: 12px; }
+}
+
 /* Pour aller plus loin : liens internes, marqués d'une flèche, distincts des sources externes */
 .gh-content .kb-further a:not([href^="http"])::after,
 .gh-content .kb-further a[href*="reachingkibo.com"]::after { content: " \2192"; text-decoration: none; display: inline-block; margin-left: 0.15em; }
