@@ -40,7 +40,7 @@ Do not run `gscan .` in the working tree: gscan deletes `.git` and `node_modules
 
 `main` only changes through pull requests. Each pull request runs the CI: tracked-file checks (no font binaries, source maps, personal e-mail addresses, local paths or tokens), a fresh build that must match the committed `assets/built/`, and gscan. Write commit messages in English.
 
-Maintainer changes are prepared in a private repository, then promoted as a single commit on a `promotion/<sha>` branch and merged through a pull request like any other change. Its `Transit-Commit` trailer records the private commit it came from.
+Maintainer changes are prepared in a private repository, then promoted as a single commit on a `promotion/<sha>` branch. The Promote workflow opens the pull request, which is reviewed and merged like any other change. The commit's `Transit-Commit` trailer records the private commit it came from.
 
 ## License
 
