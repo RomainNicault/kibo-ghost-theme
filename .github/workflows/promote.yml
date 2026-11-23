@@ -1,64 +1,144 @@
 name: Promote
 
-# Publishes one reviewed commit of the private transit repository as a single
-# squashed commit on branch promotion/<sha>, then opens its pull request.
+# Publishes the theme commit served on the site, read from the private transit
+# repository, as a single squashed commit on main. The agent only sets the
+# transit branch `publication` on a commit already deployed. Nothing is pushed
+# here before Romain approves the `promotion` environment; the approval alone
+# then publishes: branch, pull request, required check, rebase merge.
 # The transit tree is read, never executed. `.github/` always comes from main.
 
 on:
+  schedule:
+    - cron: "17 5 * * *"
   workflow_dispatch:
-    inputs:
-      sha:
-        description: Transit commit to promote (40 hexadecimal characters)
-        required: true
-        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: promote-${{ inputs.sha }}
+  group: promote
   cancel-in-progress: false
 
 jobs:
-  promote:
+  detect:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      SHA: ${{ inputs.sha }}
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      action: ${{ steps.decide.outputs.action }}
+      sha: ${{ steps.decide.outputs.sha }}
+      base: ${{ steps.decide.outputs.base }}
     steps:
-      - name: Check input
-        run: |
-          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be 40 lowercase hexadecimal characters"; exit 1; }
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 1
+          ref: main
+          fetch-depth: 0
           persist-credentials: false
 
-      - name: Fetch transit commit
+      - name: Fetch transit refs
         env:
           TRANSIT_KEY: ${{ secrets.TRANSIT_DEPLOY_KEY }}
+        run: bash .github/scripts/fetch_transit.sh
+
+      - name: Decide
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          set +x
-          key="$RUNNER_TEMP/transit_key"; hosts="$RUNNER_TEMP/known_hosts"
-          install -m 600 /dev/null "$key"
-          printf '%s\n' "$TRANSIT_KEY" > "$key"
-          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$hosts"
-          export GIT_SSH_COMMAND="ssh -i $key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$hosts -o User=git"
-          ok=0
-          git fetch -q --no-tags --depth 1 ssh://github.com/RomainNicault/kibo-ghost-theme-transit.git "$SHA" >/dev/null 2>&1 \
-            && [ "$(git rev-parse FETCH_HEAD)" = "$SHA" ] && ok=1
-          rm -f "$key"
-          [ "$ok" = 1 ] || { echo "::error::transit commit not found"; exit 1; }
+          set -euo pipefail
+          base=$(git rev-parse HEAD)
+          out=$(python3 .github/scripts/promote_candidate.py "$base")
+          action=$(printf '%s\n' "$out" | sed -n 's/^action=//p')
+          sha=$(printf '%s\n' "$out" | sed -n 's/^sha=//p')
+          if [ "$action" != skip ] && [ -n "$sha" ]; then
+            seen=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=refused-$sha" --jq .total_count)
+            [ "$seen" = 0 ] || action=skip
+          fi
+          { echo "action=$action"; echo "sha=$sha"; echo "base=$base"; } >> "$GITHUB_OUTPUT"
+          echo "Candidate: ${sha:-none}, action: $action" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Gate
+        if: steps.decide.outputs.action == 'promote'
         env:
+          SHA: ${{ steps.decide.outputs.sha }}
           PRIVATE_LEXICON: ${{ secrets.PRIVATE_LEXICON }}
         run: python3 .github/scripts/promote_gate.py "$SHA" "$(git rev-parse HEAD)"
 
+      - name: Record refusal
+        if: failure() || steps.decide.outputs.action == 'refuse'
+        env:
+          SHA: ${{ steps.decide.outputs.sha }}
+        run: |
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || SHA=unknown
+          mkdir -p "$RUNNER_TEMP/refused" && echo "$SHA" > "$RUNNER_TEMP/refused/sha"
+          echo "REFUSED_NAME=refused-$SHA" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure() || steps.decide.outputs.action == 'refuse'
+        with:
+          name: ${{ env.REFUSED_NAME }}
+          path: ${{ runner.temp }}/refused/sha
+          retention-days: 90
+
+      - name: Fail on refusal
+        if: steps.decide.outputs.action == 'refuse'
+        run: |
+          echo "::error::candidate refused"
+          exit 1
+
+  promote:
+    needs: detect
+    if: needs.detect.outputs.action == 'promote'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: promotion
+    env:
+      SHA: ${{ needs.detect.outputs.sha }}
+      BASE: ${{ needs.detect.outputs.base }}
+    steps:
+      - name: Check input
+        run: |
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ && "$BASE" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::bad detect output"; exit 1; }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Main unchanged since detection
+        run: |
+          [ "$(git rev-parse HEAD)" = "$BASE" ] || { echo "::error::main moved while waiting for approval"; exit 1; }
+
+      - name: Fetch transit refs again
+        env:
+          TRANSIT_KEY: ${{ secrets.TRANSIT_DEPLOY_KEY }}
+        run: bash .github/scripts/fetch_transit.sh
+
+      - name: Candidate still current
+        id: current
+        run: |
+          set -euo pipefail
+          out=$(python3 .github/scripts/promote_candidate.py "$BASE")
+          if [ "$(printf '%s\n' "$out" | sed -n 's/^action=//p')" = promote ] \
+             && [ "$(printf '%s\n' "$out" | sed -n 's/^sha=//p')" = "$SHA" ]; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "Candidate replaced or no longer eligible: nothing published." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Gate
+        if: steps.current.outputs.ok == '1'
+        env:
+          PRIVATE_LEXICON: ${{ secrets.PRIVATE_LEXICON }}
+        run: python3 .github/scripts/promote_gate.py "$SHA" "$BASE"
+
       - name: Build squashed commit
         id: commit
+        if: steps.current.outputs.ok == '1'
         env:
           GIT_AUTHOR_NAME: Romain Nicault
           GIT_AUTHOR_EMAIL: RomainNicault@users.noreply.github.com
@@ -77,6 +157,7 @@ jobs:
 
       - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app
+        if: steps.current.outputs.ok == '1'
         with:
           client-id: ${{ vars.PROMOTE_APP_CLIENT_ID }}
           private-key: ${{ secrets.PROMOTE_APP_KEY }}
@@ -84,20 +165,25 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-      - name: Push promotion branch
+      - name: Push, open and merge the pull request
+        if: steps.current.outputs.ok == '1'
         env:
           TOKEN: ${{ steps.app.outputs.token }}
           COMMIT: ${{ steps.commit.outputs.commit }}
         run: |
           set +x; set -euo pipefail
           remote_main=$(git ls-remote "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" refs/heads/main | cut -f1)
-          [ "$remote_main" = "$(git rev-parse HEAD)" ] || { echo "::error::main moved during the run, dispatch again"; exit 1; }
+          [ "$remote_main" = "$BASE" ] || { echo "::error::main moved during the run"; exit 1; }
           if git ls-remote --exit-code "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "refs/heads/promotion/$SHA" >/dev/null 2>&1; then
-            echo "::error::promotion/$SHA already exists: merge or close its pull request, delete the branch, then dispatch again"; exit 1
+            echo "::error::promotion/$SHA already exists"; exit 1
           fi
           helper='!f() { echo username=x-access-token; echo "password=$TOKEN"; }; f'
-          git -c credential.helper= -c credential.helper="$helper" push -q "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "$COMMIT:refs/heads/promotion/$SHA"
-          echo "Compare: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/main...promotion/$SHA" >> "$GITHUB_STEP_SUMMARY"
-          body=$(printf 'Promotion of transit commit `%s`.\n\nReview the diff, wait for `check`, then merge with **Rebase and merge** to keep the `Transit-Commit` trailer.\n' "$SHA")
+          git -c credential.helper= -c credential.helper="$helper" push -q "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "$COMMIT:refs/heads/promotion/$SHA" >/dev/null 2>&1 \
+            || { echo "::error::push refused"; exit 1; }
+          body=$(printf 'Promotion of transit commit `%s`, approved in the `promotion` environment.\n' "$SHA")
           url=$(GH_TOKEN="$TOKEN" gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "promotion/$SHA" --title "Promote theme update" --body "$body")
           echo "Pull request: $url" >> "$GITHUB_STEP_SUMMARY"
+          sleep 15
+          GH_TOKEN="$TOKEN" gh pr checks "$url" --repo "$GITHUB_REPOSITORY" --required --watch --interval 20 >/dev/null
+          GH_TOKEN="$TOKEN" gh pr merge "$url" --repo "$GITHUB_REPOSITORY" --rebase --match-head-commit "$COMMIT"
+          echo "Merged: $url" >> "$GITHUB_STEP_SUMMARY"
